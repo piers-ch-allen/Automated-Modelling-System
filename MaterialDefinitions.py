@@ -2,6 +2,8 @@ import abaqus
 import abaqusConstants as aq
 from numpy import *
 execfile('LoopVar.py')
+currOgdenParam = OgdenParams[OgdenVal-1]
+print(currOgdenParam)
 
 ## Define the material properties to the part and add the material section defintion.
 # Linear Elastic
@@ -13,7 +15,7 @@ execfile('LoopVar.py')
 # Ogden Hyper Elastic model
 myCartMat2 = myModel.Material(name='OgdenElastic')
 myCartMat2.Hyperelastic(type=aq.OGDEN, testData = aq.OFF, moduliTimeScale=aq.LONG_TERM,
-    n=3, table=((OgdenParams),))
+    n=3, table=((currOgdenParam),))
 mySection = myModel.HomogeneousSolidSection(material='OgdenElastic',
        name='Section-Cartilage-Ogden', thickness=None)
 

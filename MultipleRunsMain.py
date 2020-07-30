@@ -12,19 +12,23 @@ execfile('LoopVar.py')
 #initialise all the different values
 counterLoad = 1
 counterMesh = 1
+counterOgden = 1
 totalNumJobs = 0
 sizeMesh = len(MeshDensityArray)
-
 for x in LoadMagnitudesArray:
-    for y in MeshDensityArray:
-        #initialise the new model with magnitues and mesh size
-        localParameter = {'LoadMagnitude': x, 'MeshSize': y, 'counterLoad': counterLoad, 
-            'counterMesh':counterMesh}
+    for y in MeshDensityArray:  
+        for z in range(1,len(OgdenParams)+1):
+            #initialise the new model with magnitues and mesh size
+            localParameter = {'LoadMagnitude': x, 'MeshSize': y, 'OgdenParams':z, 'counterLoad': counterLoad, 
+                'counterMesh':counterMesh, 'counterOgden':counterOgden}
 
-        #exec the sub python file
-        execfile('ModelCreator.py', localParameter)
+            #exec the sub python file
+            execfile('ModelCreator.py', localParameter)
+            print(counterOgden)
+            counterOgden = counterOgden + 1;
+            totalNumJobs = totalNumJobs + 1
+        counterOgden = 1;
         counterMesh = counterMesh + 1
-        totalNumJobs = totalNumJobs + 1
     counterLoad = counterLoad + 1
     counterMesh = 1;
 
@@ -33,12 +37,13 @@ JobsArray = list()
 JobsNameArray = list()
 for x in range(1,len(LoadMagnitudesArray) + 1):
     for y in range(1,len(MeshDensityArray) + 1):
-        index = 5*(x-1) + y 
-        JobsName = 'Cart_Load_Practice_Load' + str(x) + '_Mesh' + str(y)
-        ModelName = '2DBeam_Load' + str(x) + '_Mesh' + str(y)
-        myJob = mdb.Job(name=JobsName, model=ModelName)
-        JobsArray.append(myJob)
-        JobsNameArray.append(JobsName)
+        for z in range(1,len(OgdenParams)+1):
+            index = 5*(x-1) + y 
+            JobsName = 'Cart_Load_Practice_Load' + str(x) + '_Mesh' + str(y) + '_Ogden' + str(z)
+            ModelName = '2DBeam_Load' + str(x) + '_Mesh' + str(y) + '_Ogden' + str(z)
+            myJob = mdb.Job(name=JobsName, model=ModelName)
+            JobsArray.append(myJob)
+            JobsNameArray.append(JobsName)
 
 #get current working directory
 import os 
@@ -51,8 +56,7 @@ for x in range(0,len(JobsArray)):
     if not os.path.exists(newDir):
         os.mkdir(newDir)
     os.chdir(newDir)
-    rem = (x)%sizeMesh
-    print(MeshDensityArray[rem]);
+    rem = int(float((JobsNameArray[x])[29]))-1
     try:
         Job.submit()
         Job.waitForCompletion()

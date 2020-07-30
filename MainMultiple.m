@@ -64,15 +64,22 @@ end
 fprintf(fid2,'%0.8f', mesh(1,size(mesh,2)));
 fprintf(fid2,']\n');
 % Load array of Odgen parameters
+
+name = strcat('OgdenParams = [');
+fprintf(fid2,name);
 for i = 1:size(ogden, 1)
-    name = strcat('OgdenParams ',int2str(i) ,' = [');
-    fprintf(fid2,name);
+    fprintf(fid2,'['); 
     for j = 1:(size(ogden,2)-1)
         fprintf(fid2,'%0.8f,', ogden(i,j));
     end
     fprintf(fid2,'%0.8f', ogden(1,size(ogden,2)));
-    fprintf(fid2,']\n'); 
+    fprintf(fid2,']'); 
+    if(i ~= size(ogden,1))
+        fprintf(fid2,','); 
+    end
 end
+fprintf(fid2,']\n'); 
+
 
 
 %Make models and gather loading results files.
@@ -86,7 +93,7 @@ Allresults = cell(size(load,2), size(mesh,2), size(ogden,1));
 for i = 1 : size(load,2)
     for j = 1 : size(mesh, 2)
         for k = 1 : size(ogden,1)
-            dir = pwd + "\Cart_Load_Practice_Load" + i + "_Mesh" + j;
+            dir = pwd + "\Cart_Load_Practice_Load" + i + "_Mesh" + j + "_Ogden" + k;
             Allresults{i,j,k} = ImportScripts(dir,2);
         end
     end
