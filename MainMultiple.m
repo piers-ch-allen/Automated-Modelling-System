@@ -98,5 +98,5 @@ for i = 1 : size(load,2)
         end
     end
 end
-clearvars i j k dir load mesh ogden;
+clearvars i j k dir load mesh ogden name abVars; 
 
