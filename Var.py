@@ -7,4 +7,4 @@ GridSpaceY2 = 0.00100000
 YOrigin = 0.00050000
 maxHeight = 80.00000000
 ElasticMod = 1000000000.00000000
-PoisonRatio = 0.300000000
+PoisonRatio = 0.30000000

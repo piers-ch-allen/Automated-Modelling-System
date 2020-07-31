@@ -73,19 +73,19 @@ for x in range(0,len(JobsArray)):
             session.xyDataListFromField(odb=ODBsesh, outputPosition=aq.NODAL, variable=(('U', 
                 aq.NODAL, ((aq.INVARIANT, 'Magnitude'), )), ), nodePick=(('CARTINSTANCE', 1, ('[#0:26 #8000 ]', )), ), )
             x0 = session.xyDataObjects['U:Magnitude PI: CARTINSTANCE N: 848']
-            session.writeXYReport(fileName='abaqus.rpt', xyData=(x0, )) 
+            session.writeXYReport(fileName='abaqus.rpt', xyData=(x0, ), appendMode = FALSE) 
             del session.xyDataObjects['U:Magnitude PI: CARTINSTANCE N: 848']  
         elif MeshDensityArray[rem] == 0.00015:
             session.xyDataListFromField(odb=ODBsesh, outputPosition=aq.NODAL, variable=(('U', 
                 aq.NODAL, ((aq.INVARIANT, 'Magnitude'), )), ), nodePick=(('CARTINSTANCE', 1, ('[#0:12 #400000 ]', )), ), )
             x0 = session.xyDataObjects['U:Magnitude PI: CARTINSTANCE N: 407']
-            session.writeXYReport(fileName='abaqus.rpt', xyData=(x0, )) 
+            session.writeXYReport(fileName='abaqus.rpt', xyData=(x0, ), appendMode = FALSE) 
             del session.xyDataObjects['U:Magnitude PI: CARTINSTANCE N: 407']  
         elif MeshDensityArray[rem] == 0.0002:   
             session.xyDataListFromField(odb=ODBsesh, outputPosition=aq.NODAL, variable=(('U', 
                 aq.NODAL, ((aq.INVARIANT, 'Magnitude'), )), ), nodePick=(('CARTINSTANCE', 1, ('[#0:7 #2 ]', )), ), )
             x0 = session.xyDataObjects['U:Magnitude PI: CARTINSTANCE N: 226']
-            session.writeXYReport(fileName='abaqus.rpt', xyData=(x0, )) 
+            session.writeXYReport(fileName='abaqus.rpt', xyData=(x0, ), appendMode = FALSE) 
             del session.xyDataObjects['U:Magnitude PI: CARTINSTANCE N: 226']
     except:
         print("too many nodes");

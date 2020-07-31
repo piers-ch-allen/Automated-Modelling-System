@@ -1,7 +1,5 @@
+function [Allresults] = MainMultiple(iteration)
 %%Script to run abaqus with predefined values.
-%Close all instances and clear workspace
-clear, close all,
-clc;
 
 %% Variables Definition
 AbacusVariables = ImportScripts(pwd, 1);
@@ -31,19 +29,19 @@ load = AbacusVariables(11,:); load = load(1,2:size(load,2));
 mesh = AbacusVariables(12,:); mesh = mesh(1,2:size(mesh,2));
 ogden = AbacusVariables(13:abVars,:); ogden = ogden(1:size(ogden,1),2:size(ogden,2));
 for i = 1:size(load,2)
-    if load{1,i} == ''
+    if strcmp(load{1,i},"")
         load = load(1,1:i-1); break;
     end
 end
 load = cell2mat(load);
 for i = 1:size(mesh,2)
-    if mesh{1,i} == ''
+    if strcmp(mesh{1,i},"")
         mesh = mesh(1,1:i-1); break;
     end
 end
 mesh = cell2mat(mesh);
 for i = 1:size(ogden,2)
-    if ogden{1,i} == ''
+    if strcmp(ogden{1,i},"")
         ogden = ogden(1,1:i-1); break;
     end
 end
@@ -90,13 +88,19 @@ clearvars ans fid2 i mo ans AbacusVariables
 %% Output handeler
 %access displacement data within the output files.
 Allresults = cell(size(load,2), size(mesh,2), size(ogden,1));
+newDir = pwd + "\Iteration_" + iteration;
+if ~exist(newDir, 'dir')
+   mkdir(newDir)
+end
 for i = 1 : size(load,2)
     for j = 1 : size(mesh, 2)
         for k = 1 : size(ogden,1)
             dir = pwd + "\Cart_Load_Practice_Load" + i + "_Mesh" + j + "_Ogden" + k;
             Allresults{i,j,k} = ImportScripts(dir,2);
+            %Move previously rounds data into folder structure for safe keeping.
+            movefile(dir,newDir);
         end
     end
 end
-clearvars i j k dir load mesh ogden name abVars; 
-
+movefile(pwd+"\trialModels.cae", newDir);
+clearvars i j k dir load mesh ogden name abVars;
