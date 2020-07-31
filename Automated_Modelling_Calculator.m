@@ -13,7 +13,8 @@ iterCount = 2;
 bestData = 1;
 
 %perform data changes based on outputs and sve over data file.
-[convergence, bestData] = dataManip(output, realData, bestData);
+bestCount = 0;
+[convergence, bestData] = DataManipulator(output, realData, bestData, bestCount);
 
 %% Start iteration loop for model convergence
 %iterate through a number of model creations and data changes until a level
@@ -23,7 +24,7 @@ while (iterCount < numIterations && convergence == false)
     output = MainMultiple(iterCount);
     
     %perform data manipulation on the dataset
-    [convergence, bestData] = dataManip(output, realData, bestData);
+    [convergence, bestData] = DataManipulator(output, realData, bestData, bestCount);
     
     %increase iteration nunmber
     iterCount = iterCount + 1;
