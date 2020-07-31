@@ -103,4 +103,5 @@ for i = 1 : size(load,2)
     end
 end
 movefile(pwd+"\trialModels.cae", newDir);
+copyfile(pwd+"\AbacusVariables.xlsx", newDir);
 clearvars i j k dir load mesh ogden name abVars;
