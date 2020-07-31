@@ -11,10 +11,37 @@ for i = 1:size(ogden,2)
 end
 ogden = cell2mat(ogden);
 
+% Check if it is initialisation run, ogden will have no values so set to
+% initial value passed through as outputDataSet
+if(isempty(ogden))
+    ogden = [outputDataSet;outputDataSet];
+end
 
+%define number of models
+numModels = 10;
+
+%% Compare displacement data of real values to model outputs.
+% order the possible variable combinations.
+newData = ones(numModels - 2, 9);
+
+
+%include top two models from previous iteration and define new dataset.
+newOgdenVars = ones(numModels,9);
+newOgdenVars(1:2,:) = ogden(1:2,:);
+newOgdenVars(3:numModels, :) = newData;
+bestData = ogden(1,:);
+if(bestData == bestPrevData)  
+    bestCount = bestCount + 1; 
+else
+    bestCount = 1;
+end
+
+%if the same data is the best for 10 consecutive runs.
+if(bestCount == 10)
+    convergence = true;
+end
 
 %% Write new values to the Abacus Variables file.
 filename = strcat(pwd, '\AbacusVariables.xlsx');
-numModels = size(newOgdenVars,1);
 loc = strcat('b20:J',int2str(20+numModels - 1));
 writematrix(newOgdenVars,filename,'Sheet',1,'Range',loc);

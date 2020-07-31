@@ -37,13 +37,16 @@ elseif importType == 2
 
     % Import the data
     filename = strcat(dir, '\abaqus.rpt');
-    abaqus = readtable(filename, opts);
-
-    %% Convert to output type
-    temp = table2array(abaqus);
-    while isnan(temp(1,1))
-        temp(1,:) = [];
+    try
+        abaqus = readtable(filename, opts);
+        temp = table2array(abaqus);
+        while isnan(temp(1,1))
+            temp(1,:) = [];
+        end
+    catch
+        temp = 1;
     end
+    %% Convert to output type
     AbacusVariables = temp;
 
     %% Clear temporary variables

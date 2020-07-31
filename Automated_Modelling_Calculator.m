@@ -1,4 +1,4 @@
-function Automated_Modelling_Calculator(numIterations, realData)
+function Automated_Modelling_Calculator(numIterations, realData, initialSolution)
 %%Function to provide the parent class of the Automated modelling process
 % Itdoes inital data calculation and then provides a framework for
 % rerunning the process until a convergence is met.
@@ -8,6 +8,7 @@ function Automated_Modelling_Calculator(numIterations, realData)
 
 %% Initial Step
 %Gather the dataFile at its initialisation point
+[~,~] = DataManipulator(initialSolution, realData, 1, 1);
 output = MainMultiple(1);
 iterCount = 2;
 bestData = 1;
