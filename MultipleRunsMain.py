@@ -13,20 +13,24 @@ execfile('LoopVar.py')
 counterLoad = 1
 counterMesh = 1
 counterOgden = 1
+counterVis = 1
 totalNumJobs = 0
 sizeMesh = len(MeshDensityArray)
 for x in LoadMagnitudesArray:
     for y in MeshDensityArray:  
         for z in range(1,len(OgdenParams)+1):
-            #initialise the new model with magnitues and mesh size
-            localParameter = {'LoadMagnitude': x, 'MeshSize': y, 'OgdenParams':z, 'counterLoad': counterLoad, 
-                'counterMesh':counterMesh, 'counterOgden':counterOgden}
+            for v in range(1,int(NumVis)+1):
+                #initialise the new model with magnitues and mesh size
+                localParameter = {'LoadMagnitude': x, 'MeshSize': y, 'OgdenParams':z, 'counterLoad': counterLoad, 
+                    'counterMesh':counterMesh, 'counterOgden':counterOgden, 'numVisco':NumVis, 'counterVis':counterVis}
 
-            #exec the sub python file
-            execfile('ModelCreator.py', localParameter)
-            print(counterOgden)
+                #exec the sub python file
+                execfile('ModelCreator.py', localParameter)
+                print(counterOgden)
+                counterVis = counterVis + 1;
+                totalNumJobs = totalNumJobs + 1;
             counterOgden = counterOgden + 1;
-            totalNumJobs = totalNumJobs + 1
+            counterVis = 1;
         counterOgden = 1;
         counterMesh = counterMesh + 1
     counterLoad = counterLoad + 1
@@ -38,12 +42,13 @@ JobsNameArray = list()
 for x in range(1,len(LoadMagnitudesArray) + 1):
     for y in range(1,len(MeshDensityArray) + 1):
         for z in range(1,len(OgdenParams)+1):
-            index = 5*(x-1) + y 
-            JobsName = 'Cart_Load_Practice_Load' + str(x) + '_Mesh' + str(y) + '_Ogden' + str(z)
-            ModelName = '2DBeam_Load' + str(x) + '_Mesh' + str(y) + '_Ogden' + str(z)
-            myJob = mdb.Job(name=JobsName, model=ModelName)
-            JobsArray.append(myJob)
-            JobsNameArray.append(JobsName)
+            for v in range(1,int(NumVis)+1):
+                index = 5*(x-1) + y 
+                JobsName = 'Cart_Load_Practice_Load' + str(x) + '_Mesh' + str(y) + '_Ogden' + str(z) + '_Visco' + str(v)
+                ModelName = '2DBeam_Load' + str(x) + '_Mesh' + str(y) + '_Ogden' + str(z) + '_Visco' + str(v)
+                myJob = mdb.Job(name=JobsName, model=ModelName)
+                JobsArray.append(myJob)
+                JobsNameArray.append(JobsName)
 
 #get current working directory
 import os 

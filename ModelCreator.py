@@ -9,7 +9,7 @@ from numpy import *
 execfile('Var.py')
 
 # Create a model.
-modelName = '2DBeam_Load' + str(counterLoad) + '_Mesh' + str(counterMesh) + '_Ogden' + str(counterOgden)
+modelName = '2DBeam_Load' + str(counterLoad) + '_Mesh' + str(counterMesh) + '_Ogden' + str(counterOgden) + '_Visco' + str(counterVis)
 myModel = mdb.Model(name=modelName, modelType=aq.STANDARD_EXPLICIT)
 
 #-----------------------------------------------------
@@ -55,7 +55,7 @@ BottomSet = myCartPart.sets['Bottom'];
 #Add Material Properties & section assignments through MaterialDefinitions.py
 # Define all the different load patterns within the LoadDefinitions Python File.
 MaterialParameter = {'ElasticMod': ElasticMod, 'PoisonRatio': PoisonRatio, 
-    'myModel': myModel, 'myCartPart':myCartPart, 'FaceSet':FaceSet, 'OgdenVal':counterOgden}
+    'myModel': myModel, 'myCartPart':myCartPart, 'FaceSet':FaceSet, 'OgdenVal':counterOgden, 'ViscoVal':counterVis}
 execfile('MaterialDefinitions.py', MaterialParameter)
 
 #-----------------------------------------------------
@@ -110,7 +110,6 @@ myViewport.setValues(displayedObject=myAssembly)
 
 #-------------------------------------------------------
 # Define the job for the model and submit it.
-
-jobName = 'Cart_Load_Practice_Load' + str(counterLoad) + '_Mesh' + str(counterMesh) + '_Ogden' + str(counterOgden)
+jobName = 'Cart_Load_Practice_Load' + str(counterLoad) + '_Mesh' + str(counterMesh) + '_Ogden' + str(counterVis) + '_Visco' + str(counterOgden)
 myJob = mdb.Job(name=jobName, model=modelName,
     description='Cartilage Beam Load')
