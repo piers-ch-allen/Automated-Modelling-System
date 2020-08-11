@@ -24,7 +24,6 @@ numModels = 10;
 % order the possible variable combinations.
 newData = ones(numModels - 2, 9);
 
-
 %include top two models from previous iteration and define new dataset.
 newOgdenVars = ones(numModels,9);
 newOgdenVars(1:2,:) = ogden(1:2,:);

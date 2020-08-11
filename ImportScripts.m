@@ -60,7 +60,7 @@ elseif importType == 3
     opts.VariableNames = ["Visco1", "VarName2", "VarName3", "VarName4"];
     opts.VariableTypes = ["double", "double", "double", "double"];
     % Import the data
-    AbacusVariablesVisco = readtable(dir + "\AbacusVariablesVisco.xlsx", opts, "UseExcel", false);
+    AbacusVariablesVisco = readtable(dir + "\Prony Code\AbacusVariablesVisco.xlsx", opts, "UseExcel", false);
     %% Convert to output type
     AbacusVariablesVisco = table2array(AbacusVariablesVisco(:,2:4));
     ViscoVariables = cell(1,size(AbacusVariablesVisco,1)/3);

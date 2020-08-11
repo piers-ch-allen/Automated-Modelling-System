@@ -1,6 +1,6 @@
 function [Allresults] = MainMultiple(iteration)
 %%Script to run abaqus with predefined values.
-
+%output is displacement data by time.
 %% Variables Definition
 AbacusVariables = ImportScripts(pwd, 1);
 mo='noGUI';

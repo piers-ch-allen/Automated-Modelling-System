@@ -1,10 +1,11 @@
 function dataSet = GeneticPronyManip(top6, numInGen)
 %50:50 split on crossover and mutations
 siz = size(top6, 2);
+siz2 = size(top6, 1);
 N = (siz - 1) / 2;
 %numInGen = 20
 quartile = floor(numInGen / 4);
-if(mod(quartile,2) ~= 0) 
+if(mod(quartile,6) ~= 0) 
     quartile = quartile + 1;
 end
 %perform the crossover half using top6 values.
@@ -21,10 +22,10 @@ while i < quartile
     crossOverPoint = floor(mod(abs(randn(1)),1) * siz);
     Parent1 = 0; Parent2 = 0;
     while(Parent1 == 0 || Parent2 == 0) 
-        Parent1 = ceil(mod(abs(randn(1)),1) * 100);
-        Parent2 = ceil(mod(abs(randn(1)),1) * 100);
+        Parent1 = ceil(mod(abs(randn(1)),1) * siz2);
+        Parent2 = ceil(mod(abs(randn(1)),1) * siz2);
         if (Parent1 == Parent2)
-            Parent2 = 100 - Parent2;
+            Parent2 = siz - Parent2;
         end
     end
     Parent1 = top6(Parent1,:);
@@ -68,10 +69,10 @@ while i < quartile
     %generate the parents
     Parent1 = 0; Parent2 = 0;
     while(Parent1 == 0 || Parent2 == 0) 
-        Parent1 = ceil(mod(abs(randn(1)),1) * 100);
-        Parent2 = ceil(mod(abs(randn(1)),1) * 100);
+        Parent1 = ceil(mod(abs(randn(1)),1) * siz2);
+        Parent2 = ceil(mod(abs(randn(1)),1) * siz2);
         if (Parent1 == Parent2)
-            Parent2 = 100 - Parent2;
+            Parent2 = siz - Parent2;
         end
     end
     Parent1 = top6(Parent1,:);
@@ -116,9 +117,9 @@ mutationDataSet = zeros(quartile*2, siz);
 
 %Gaussian mutation on g values
 %set up distribution variables
-MU_G_g_Nt = [mean(top6(:,1)),mean(mean(top6(:,2:(N+1)))),mean(top6(:,(N+2):siz))];
+MU_G_g_Nt = [mean(top6(:,1)),mean(top6(:,2:(N+1))),mean(top6(:,(N+2):siz))];
 gvals = top6(:,2:(N+1));
-STD_G_g_Nt = [std(top6(:,1)), std(reshape(gvals, 1, N*100)), std(top6(:,(N+2):siz))];
+STD_G_g_Nt = [std(top6(:,1)), std(top6(:,2:(N+1))), std(top6(:,(N+2):siz))];
 pDs = cell(1,size(MU_G_g_Nt,2));
 for i = 1:size(MU_G_g_Nt,2)
     pDs{1,i} = makedist('Normal','mu',MU_G_g_Nt(1,i),'sigma',STD_G_g_Nt(1,i));
@@ -133,7 +134,7 @@ end
 %perform the mutations
 for i = 1:quartile*2
     %Choose parent
-    Parent = top6(ceil(mod(abs(randn(1)),1) * 100),:);
+    Parent = top6(ceil(mod(abs(randn(1)),1) * size(top6, 1)),:);
     for j = 1:siz
         %Chance of mutation is 1/length of array
         mutChance = ceil(mod(abs(randn(1)),1)*siz);
