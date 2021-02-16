@@ -28,7 +28,7 @@ bestCount = 2;
 %of convergence is reached.
 while (iterCount < numIterations && convergence == false)
     %perform model calculations on the curent dataSet
-    [convergence, bestData] = DataManipulatorProny(initData, AllData, bestData, bestCount);
+    [convergence, bestData] = DataManipulatorVisco(initData, AllData, bestData, bestCount);
     %increase iteration nunmber
     iterCount = iterCount + 1;
     output = MainMultiple(iteration);

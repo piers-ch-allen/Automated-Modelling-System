@@ -1,4 +1,4 @@
-function err = PronyErrFuncIncDist(a, data)
+function err = ViscoErrFuncIncDist(a, data)
 N = (size(a,2) - 1) / 2;
 dataSize = size(data,1);
 err = 0;

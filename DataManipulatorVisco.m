@@ -1,11 +1,11 @@
-function [convergence, bestData, bestCount] = DataManipulatorProny(outputDataSet, realData, bestPrevData, bestCount)
+function [convergence, bestData, bestCount] = DataManipulatorVisco(outputDataSet, realData, bestPrevData, bestCount)
 %% Performs data manipulation to produce new variables for model consideration
 %perform the prony manipulation
 numInGen = 24;
-dataManip = GeneticPronyManip(outputDataSet, numInGen);
+dataManip = ViscoPronyManip(outputDataSet, numInGen);
 dataSiz = size(dataManip , 2);
 for i = 1:numInGen
-    dataManip(i,dataSiz+1) = PronyErrFuncIncDist(dataManip(i,1:dataSiz), realData);
+    dataManip(i,dataSiz+1) = ViscoErrFuncIncDist(dataManip(i,1:dataSiz), realData);
 end
 [~, idx]=sort(dataManip(:,8));
 dataManip = dataManip(idx,:);

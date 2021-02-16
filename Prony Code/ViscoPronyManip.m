@@ -1,4 +1,4 @@
-function dataSet = GeneticPronyManip(top6, numInGen)
+function dataSet = ViscoPronyManip(top6, numInGen)
 %50:50 split on crossover and mutations
 siz = size(top6, 2);
 siz2 = size(top6, 1);
