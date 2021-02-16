@@ -19,7 +19,7 @@ clearvars i newData1 vars
 %perform data changes based on outputs and save over data file.
 [convergence,bestData] = DataManipulatorVisco(initData, AllData, 1, 1);
 %gather displacement data from the solved models
-output = MainMultiple(iteration);
+output = MainMultiple(1);
 iterCount = 2;
 bestCount = 2;
 
@@ -31,7 +31,7 @@ while (iterCount < numIterations && convergence == false)
     [convergence, bestData] = DataManipulatorVisco(initData, AllData, bestData, bestCount);
     %increase iteration nunmber
     iterCount = iterCount + 1;
-    output = MainMultiple(iteration);
+    output = MainMultiple(iterCount);
 end
 
 %% Do something with the output results after iterations are completed 
