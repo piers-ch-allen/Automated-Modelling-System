@@ -17,7 +17,7 @@ end
 clearvars i newData1 vars
 
 %perform data changes based on outputs and save over data file.
-[convergence,bestData] = DataManipulatorProny(initData, AllData, 1, 1);
+[convergence,bestData] = DataManipulatorVisco(initData, AllData, 1, 1);
 %gather displacement data from the solved models
 output = MainMultiple(iteration);
 iterCount = 2;
