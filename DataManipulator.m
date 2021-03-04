@@ -1,7 +1,7 @@
 function [convergence, bestData] = DataManipulator(outputDataSet, realData, bestPrevData, bestCount)
 %% Performs data manipulation to produce new variables for model consideration
 %import current variable values
-AbacusVariables = ImportScripts(pwd, 1);
+%%AbacusVariables = ImportScripts(pwd, 1);
 ogden = AbacusVariables(13:size(AbacusVariables,1),:); 
 ogden = ogden(1:size(ogden,1),2:size(ogden,2));
 for i = 1:size(ogden,2)

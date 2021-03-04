@@ -1,11 +1,9 @@
-function dataSet = ViscoPronyManip(top6, numInGen)
+function dataSet = ViscoPronyManip(top100, numInGen)
 %50:50 split on crossover and mutations
-siz = size(top6, 2);
-siz2 = size(top6, 1);
+[num,siz] = size(top100);
 N = (siz - 1) / 2;
-%numInGen = 20
 quartile = floor(numInGen / 4);
-if(mod(quartile,6) ~= 0) 
+if(mod(quartile,2) ~= 0) 
     quartile = quartile + 1;
 end
 %perform the crossover half using top6 values.
@@ -22,14 +20,21 @@ while i < quartile
     crossOverPoint = floor(mod(abs(randn(1)),1) * siz);
     Parent1 = 0; Parent2 = 0;
     while(Parent1 == 0 || Parent2 == 0) 
-        Parent1 = ceil(mod(abs(randn(1)),1) * siz2);
-        Parent2 = ceil(mod(abs(randn(1)),1) * siz2);
+        Parent1 = ceil(mod(abs(randn(1)),1) * num);
+        Parent2 = ceil(mod(abs(randn(1)),1) * num);
         if (Parent1 == Parent2)
-            Parent2 = siz - Parent2;
+            Parent2 = abs(num - Parent2);
+            if Parent2 == 0
+                if Parent1 == num
+                    Parent2 = Parent1 - 1;
+                else
+                    Parent2 = Parent1 + 1;
+                end
+            end
         end
     end
-    Parent1 = top6(Parent1,:);
-    Parent2 = top6(Parent2,:);
+    Parent1 = top100(Parent1,1:siz);
+    Parent2 = top100(Parent2,1:siz);
     
     %perform the crossover, 2 children per crossover
     singleDataSet(i,:) = [Parent1(1,1:crossOverPoint), Parent2(1,crossOverPoint+1:siz)];
@@ -42,6 +47,11 @@ while i < quartile
         singleDataSet(i-1,:) = [singleDataSet(i-1,1:N + 1),sort(singleDataSet(i-1,N+2:siz))];
         singleDataSet(i,:) = [singleDataSet(i-1,1:N + 1),sort(singleDataSet(i-1,N+2:siz))];
     end
+    
+    %perform check on g values
+
+    singleDataSet(i-1,1:siz) = GChecker(singleDataSet(i-1,1:siz));
+    singleDataSet(i,1:siz) = GChecker(singleDataSet(i-1,1:siz));
     i = i + 1;
 end
 
@@ -59,9 +69,9 @@ while i < quartile
     end
     points = zeros(1,k);
     for j = 1:k
-        temp = ceil(mod(abs(randn(1)),1) * ((2*N) + 1));
+        temp = ceil(mod(abs(randn(1)),1) * siz);
         while(ismember(temp, points))
-            temp = ceil(mod(abs(randn(1)),1) * ((2*N) + 1));
+            temp = ceil(mod(abs(randn(1)),1) * siz);
         end
         points(1,j) = temp;
     end
@@ -69,14 +79,21 @@ while i < quartile
     %generate the parents
     Parent1 = 0; Parent2 = 0;
     while(Parent1 == 0 || Parent2 == 0) 
-        Parent1 = ceil(mod(abs(randn(1)),1) * siz2);
-        Parent2 = ceil(mod(abs(randn(1)),1) * siz2);
-        if (Parent1 == Parent2)
-            Parent2 = siz - Parent2;
+        Parent1 = ceil(mod(abs(randn(1)),1) * num);
+        Parent2 = ceil(mod(abs(randn(1)),1) * num);
+        if (Parent1 == Parent2)       
+            Parent2 = abs(num - Parent2);
+            if Parent2 == 0
+                if Parent1 == num
+                    Parent2 = Parent1 - 1;
+                else
+                    Parent2 = Parent1 + 1;
+                end
+            end
         end
     end
-    Parent1 = top6(Parent1,:);
-    Parent2 = top6(Parent2,:);
+    Parent1 = top100(Parent1,:);
+    Parent2 = top100(Parent2,:);
     
     %perform the k crossover
     points = sort(points);
@@ -104,9 +121,9 @@ while i < quartile
     temp1 = [temp1(1,1:N + 1),sort(temp1(1,N+2:siz))];
     temp2 = [temp2(1,1:N + 1),sort(temp2(1,N+2:siz))];
     
-    %assign values
-    kDataSet(i,:) = temp1;
-    kDataSet(i+1,:) = temp2;
+    %assign values and check g components
+    kDataSet(i,:) = GChecker(temp1);
+    kDataSet(i+1,:) = GChecker(temp2);
     i = i+2;
 end
 
@@ -117,9 +134,9 @@ mutationDataSet = zeros(quartile*2, siz);
 
 %Gaussian mutation on g values
 %set up distribution variables
-MU_G_g_Nt = [mean(top6(:,1)),mean(top6(:,2:(N+1))),mean(top6(:,(N+2):siz))];
-gvals = top6(:,2:(N+1));
-STD_G_g_Nt = [std(top6(:,1)), std(top6(:,2:(N+1))), std(top6(:,(N+2):siz))];
+MU_G_g_Nt = [mean(top100(:,1)),mean(mean(top100(:,2:(N+1)))),mean(top100(:,(N+2):siz))];
+gvals = top100(:,2:(N+1));
+STD_G_g_Nt = [std(top100(:,1)), std(reshape(gvals, 1, N*num)), std(top100(:,(N+2):siz))];
 pDs = cell(1,size(MU_G_g_Nt,2));
 for i = 1:size(MU_G_g_Nt,2)
     pDs{1,i} = makedist('Normal','mu',MU_G_g_Nt(1,i),'sigma',STD_G_g_Nt(1,i));
@@ -134,7 +151,7 @@ end
 %perform the mutations
 for i = 1:quartile*2
     %Choose parent
-    Parent = top6(ceil(mod(abs(randn(1)),1) * size(top6, 1)),:);
+    Parent = top100(ceil(mod(abs(randn(1)),1) * num),:);
     for j = 1:siz
         %Chance of mutation is 1/length of array
         mutChance = ceil(mod(abs(randn(1)),1)*siz);
@@ -143,8 +160,11 @@ for i = 1:quartile*2
             Parent(1,j) = Parent(1,j) + r;
         end
     end
+    %check time values are correct order
     Parent(1,N+2:siz) = sort(abs(Parent(1,N+2:siz)));
-    mutationDataSet(i,:) = Parent;
+    
+    %check g values and assign value
+    mutationDataSet(i,:) = GChecker(Parent);
 end
 
 dataSet = [singleDataSet;kDataSet;mutationDataSet];

@@ -15,13 +15,13 @@ for i = 1:length(vars)
     assignin('base', vars{i}, newData1.(vars{i}));
 end
 clearvars i newData1 vars
+bestCount = 1; genCount = 1; maxGens = 1000;
 
 %perform data changes based on outputs and save over data file.
-[convergence,bestData] = DataManipulatorVisco(initData, AllData, 1, 1);
+[convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
 %gather displacement data from the solved models
 output = MainMultiple(1);
 iterCount = 2;
-bestCount = 2;
 
 %% Start iteration loop for model convergence
 %iterate through a number of model creations and data changes until a level
