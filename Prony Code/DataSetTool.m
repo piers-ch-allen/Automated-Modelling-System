@@ -4,11 +4,11 @@ rng('default');
 rng(sum(100*clock));
 randSeed = mod(abs(randn(1)),1);
 N = (size(initProny,2) - 1) / 2;
-data = zeros(numInitGuess,(2*N)+1); 
 order = linspace(1,N,N);
 
 %generate the data set for complete randomness
 if(start == 0)
+    data = zeros(numInitGuess + 1,(2*N)+1); 
     for i = 1:numInitGuess
         %current guess x0, G, g & t series
         order = order(randperm(length(order)));
@@ -32,33 +32,36 @@ if(start == 0)
             temp(1,j) = 1000 * randSeed * rand(1) * 10^(-1 * j);
         end
         x0(1,(N+2):(2*N)+1) = sort(temp);
-        data(i,:) = GChecker(x0);
+        data(i,:) = x0;
     end
+    for i = 1:numInitGuess
+        data(i,:) = GChecker(data(i,:));
+    end
+    
 %generate the data set using start values
 else
+    data = zeros(numInitGuess + 1,(2*N)+1); 
     %perform dataset check 
-    x0 = initProny;
-    if sum(x0(1,2:N+1)) > 1
-        %wrong configuratae of values
-        x0(1,3:N+1) = zeros(1,N-1);
-    end    
+    initProny = GChecker(initProny);
+    data(1,:) = initProny;
+    rng(sum(100*clock));
+    randNum = rand(numInitGuess,(2*N) + 1);
     
-    for i = 1:numInitGuess
+    for i = 2:numInitGuess + 1
         %current guess x0, G, g & t series
         x0 = initProny;
-        for j = 1:N
-            temp = mod(abs(randn(1)),1);
-            if(temp < 1/N)
-                perc = 0.1 * initProny(1,j);
-                change = mod(abs(randn(1)),1);
-                if(mod(abs(randn(1)),1) > 0.5)
-                    x0(1,j) = x0(1,j) + (perc * change);
-                else
-                    x0(1,j) = x0(1,j) - (perc * change);
-                end
+        for j = 1:size(initProny,2)
+            if(randNum(i-1,j) > 0.5)
+                x0(1,j) = x0(1,j) + mod(abs(randn(1)),1);
+            else
+                x0(1,j) = x0(1,j) - mod(abs(randn(1)),1);
             end
         end
-        data(i,:) = GChecker(x0);
+        x0(1,N+2:(2*N)+1) = sort(x0(1,N+2:(2*N)+1));
+        data(i,:) = x0;
+    end
+    for i = 2:numInitGuess + 1
+        data(i,:) = GChecker(data(i,:));
     end
 end
 

@@ -3,8 +3,8 @@ function [Allresults] = MainMultiple(iteration)
 %output is displacement data by time.
 %% Variables Definition
 AbacusVariables = ImportScripts(pwd, 1);
-%mo='noGUI';
-mo='script';
+mo='noGUI';
+%mo='script';
 
 %Make python file with variables
 fid = fopen('Var.py', 'w');

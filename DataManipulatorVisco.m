@@ -2,7 +2,7 @@ function [convergence, bestData, bestCount] = DataManipulatorVisco(outputDataSet
 %% Performs data manipulation to produce new variables for model consideration
 %perform the prony manipulation
 numInGen = 24;
-dataManip = ViscoPronyManip(outputDataSet(:,1:7), numInGen);
+dataManip = ViscoPronyManip(outputDataSet(:,1:5), numInGen);
 dataSiz = size(dataManip , 2);
 for i = 1:numInGen
     dataManip(i,dataSiz+1) = ViscoErrFuncIncDist(dataManip(i,1:dataSiz), realData);
