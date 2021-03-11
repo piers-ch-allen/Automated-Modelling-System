@@ -1,4 +1,4 @@
-function [AbacusVariables] = ImportScripts(dir, importType)
+function [AbacusVariables] = ImportScripts(dir, N, importType)
 %% Import the data variables (Type 1)
 if importType == 1
     DataFile = strcat(dir, '\AbacusVariables.xlsx');
@@ -52,21 +52,12 @@ elseif importType == 2
     %% Clear temporary variables
     clear opts
 elseif importType == 3
-    opts = spreadsheetImportOptions("NumVariables", 4);
-    % Specify sheet and range
-    opts.Sheet = "Sheet1";
-    opts.DataRange = "A1:D12";
-    % Specify column names and types
-    opts.VariableNames = ["Visco1", "VarName2", "VarName3", "VarName4"];
-    opts.VariableTypes = ["double", "double", "double", "double"];
-    % Import the data
-    AbacusVariablesVisco = readtable(dir + "\Prony Code\AbacusVariablesVisco.xlsx", opts, "UseExcel", false);
-    %% Convert to output type
-    AbacusVariablesVisco = table2array(AbacusVariablesVisco(:,2:4));
-    ViscoVariables = cell(1,size(AbacusVariablesVisco,1)/3);
+    AbacusVariablesVisco = readcell(dir + "\Prony Code\AbacusVariablesVisco.xlsx");
+    siz = size(AbacusVariablesVisco,1);
+    ViscoVariables = cell(1,siz/3);
     viscoCount = 1;
-    for i = 1:(size(AbacusVariablesVisco,1)/3)
-        ViscoVariables{1,viscoCount} = AbacusVariablesVisco(1:3,1:3);
+    for i = 1:siz/N
+        ViscoVariables{1,viscoCount} = cell2mat(AbacusVariablesVisco(N*(i-1)+1:N*(i-1)+N,2:N+1));
         viscoCount = viscoCount + 1;
     end
     %% Clear temporary variables

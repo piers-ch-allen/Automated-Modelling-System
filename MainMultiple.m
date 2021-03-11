@@ -1,8 +1,8 @@
-function [Allresults] = MainMultiple(iteration)
+function [Allresults] = MainMultiple(iteration, N)
 %%Script to run abaqus with predefined values.
 %output is displacement data by time.
 %% Variables Definition
-AbacusVariables = ImportScripts(pwd, 1);
+AbacusVariables = ImportScripts(pwd,N, 1);
 mo='noGUI';
 %mo='script';
 
@@ -79,25 +79,25 @@ end
 fprintf(fid2,']\n'); 
 
 % Load array of Viscoelastic parameters
-viscoP = ImportScripts(pwd, 3);
+viscoP = ImportScripts(pwd, N, 3);
 for numOg = 1:size(viscoP,2)
-    name = strcat('Visco', int2str(numOg) ,' = [');
+    name = strcat('Visco', int2str(numOg) ,' = (');
     fprintf(fid2,name);
     vis = viscoP{1,numOg};
     for i = 1:(size(vis,1))
-        fprintf(fid2,'['); 
+        fprintf(fid2,'('); 
         for j = 1:(size(vis,2))
-            fprintf(fid2,'%0.8f', vis(i,j));
+            fprintf(fid2,'%0.8f', vis(j,i));
             if(j ~= size(vis,2))
                 fprintf(fid2,','); 
             end
         end
-        fprintf(fid2,']');
+        fprintf(fid2,')');
         if(i ~= size(vis,1))
             fprintf(fid2,','); 
         end
     end
-    fprintf(fid2,']\n'); 
+    fprintf(fid2,')\n'); 
 end
 fprintf(fid2,'NumVis = %0.8f\n',size(viscoP,2));
 
@@ -118,7 +118,7 @@ for i = 1 : size(load,2)
         for k = 1 : size(ogden,1)
             for v = 1 : size(viscoP,2)
                 dir = pwd + "\Cart_Load_Practice_Load" + i + "_Mesh" + j + "_Ogden" + k + "_Visco" + v;
-                Allresults{i,j,k,v} = ImportScripts(dir,2);
+                Allresults{i,j,k,v} = ImportScripts(dir,N,2);
                 %Move previously rounds data into folder structure for safe keeping.
                 movefile(dir,newDir);
             end
@@ -127,4 +127,5 @@ for i = 1 : size(load,2)
 end
 movefile(pwd+"\trialModels.cae", newDir);
 copyfile(pwd+"\AbacusVariables.xlsx", newDir);
+copyfile(pwd+"\Prony Code\AbacusVariablesVisco.xlsx", newDir);
 clearvars i j k dir load mesh ogden name abVars;

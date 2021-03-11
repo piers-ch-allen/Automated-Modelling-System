@@ -13,18 +13,26 @@ for i = 1:size(values2check,2)
     if values2check(1,i) >= (10 * minVal) && sum(values2check) > 1
         randPerm = mod(abs(randn(1)),1) * randSeed;
         if mod(randi(10),2) == 0
-            values2check(1,i) = minVal + randPerm;
+            change = minVal + randPerm;
         else
-            
-            values2check(1,i) = minVal - randPerm;
+            change = minVal - randPerm;
         end
+        values2check(1,i) = abs(change);
     end
 end
 
 %check the values:
-if sum(values2check) > 1
+if sum(values2check) >= 1
     values2check = values2check / sum(values2check);
 end
 
+%check the time values.
+values2check2 = abs(input(1,N+2:N+N+1));
+for i = 1:N
+    if values2check2(1,i) < 1
+        values2check2(1,i) = 1;
+    end
+end
+
 output = input;
-output(1,2:N+1) = values2check;
+output = [output(1,1),values2check,values2check2];

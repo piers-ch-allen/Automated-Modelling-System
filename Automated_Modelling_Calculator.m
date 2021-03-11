@@ -1,4 +1,4 @@
-function Automated_Modelling_Calculator(numIterations, realData, N)
+function Automated_Modelling_Calculator(numIterations, N)
 %%Function to provide the parent class of the Automated modelling process
 % Itdoes inital data calculation and then provides a framework for
 % rerunning the process until a convergence is met.
@@ -9,32 +9,74 @@ function Automated_Modelling_Calculator(numIterations, realData, N)
 %% Initial Step
 %Gather the dataFile at its initialisation point
 addpath('Prony Code')
-newData1 = load('-mat', 'dataStart.mat');
-vars = fieldnames(newData1);
-for i = 1:length(vars)
-    assignin('base', vars{i}, newData1.(vars{i}));
-end
-clearvars i newData1 vars
+load('dataStart.mat');
 bestCount = 1; genCount = 1; maxGens = 100; convergence = false;
-numInGen = 25; minErr = 0; inErr = 10000; iterCount = 1;
+numInGen = 10; minErr = 0; inErr = 10000; iterCount = 1;
+initError = PronySolverScriptChange(AllData, N);
+[~, idx]=sort(initError{1,1}(:,(2*N) + 2));
+initError{1,1} = initError{1,1}(idx,:);
+disp('Finished gathering initial solutions from phase 1')
 
+%initError = errOut;
 %Create initial guesses
-initGuessData = DataSetTool(errOut{1,N}, 25, 1);
+initGuessData = DataSetTool(initError{1,3}, 25, 1);
 %solve prony error for all initial values
-dataSiz = size(initGuessData , 2);
-for i = 1:numInGen
+[its, dataSiz] = size(initGuessData);
+for i = 1:its
     initGuessData(i,dataSiz+1) = ViscoErrFuncIncDist(initGuessData(i,1:dataSiz), AllData);
 end
 
+%remove incorrect solutions that have been included
+temp = initError{1,1}; initError{1,1} = []; count = 1;
+for i = 1:size(temp,1)
+    if temp(i,N+2) < 100
+        initError{1,1}(count,:) = temp(i,:);
+        count = count + 1;
+    end
+end
+
+%take 50 random choices to ensure diversity
+order = linspace(1,size(initError{1,1},1) - 25,size(initError{1,1},1) - 25);
+order = order(randperm(length(order)));
+temp = initError{1,1}(26:size(initError{1,1},1),:);
+random50 = temp(order(1,:),:);
+
+%combine the data sets
+modelSolutions = [initGuessData;random50(1:25,:)];
+disp('Initial dataset produced from guess including random and defined permutations.')
+
+%perform an initial genetic run of small number of generations to imrove
+%starting results
+modelSolutions = GeneticIterator(modelSolutions, N, 50, 5000, minErr, AllData);
+starta = 0; enda = 0;
+for i = 1:size(modelSolutions,1)
+    if starta == 0 && modelSolutions(i,(2*N)+2) == 336
+        starta = i;
+    elseif modelSolutions(i,(2*N)+2) == 336
+        enda = i;
+    end
+end
+modelSolutions = [modelSolutions(1:starta-1,:); modelSolutions(enda+1:size(modelSolutions,1),:)];
+top10 = modelSolutions(1:10,1:(2*N) + 1);
+%save inital material parameter data
+viscoVariableWriteToFile(top10, numInGen, N);
 %% Start loop for error cacluation and generation of new model possibilities
 %% Start iteration loop for model convergence
 %iterate through a number of model creations and data changes until a level
 %of convergence is reached.
+%Run the initial models based on first set of inputs.
+output = MainMultiple(iterCount, N);
+disp('First set of model runs completed, automations of run starting now.')
+
 while (iterCount < numIterations && convergence == false)
-    %calculate the error based on the current parameters
-    %run the models:
-    output = MainMultiple(iterCount);
-    
+    %calculate the error on the models for eacg set of associated parameters
+    for i = 1:numInGen
+        visOut{i,1} = output{1,1,1,i};
+        %error = blah blah blah
+        %create a new dataset populated by variations of the optimal
+        %solutions proporionate to there ranking.
+    end
+        
     %perform model calculations on the curent dataSet
     [convergence, bestData] = DataManipulatorVisco(initData, AllData, bestData, bestCount);
     %increase iteration nunmber

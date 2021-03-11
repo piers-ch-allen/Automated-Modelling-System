@@ -1,44 +1,12 @@
-function [bestParam, errorIt] = ViscoParameterSolver(numIts, numInGen, numInitGuess, minError, inErr)
-%Data = Real Data, N = Number of terms in series, numIts = number of
-%iterations of genetic algorithm, numInitGuess = number of first guesses.
-
-%% Collate initial randomised data guesses
-%Initialise the random guesses between the defined bounds
-%One guess will 2n+1 vraiables long
-
-if(numInitGuess < 100 || numInitGuess > 1000000)
-    numInitGuess = floor(10000 * rand(1));
-end
-
-%create the randomised data set
-% [initProny, initError, errOut] = getInitProny(5,20000);
-load('dataStart.mat');
-
-ovSiz = size(inErr,2);
-N = (ovSiz - 1) / 2;
-% initGuessData = randomDataSet(N, numInitGuess, storStart, lossStart);
-initGuessData = uniquetol(DataSetTool(inErr, numInitGuess, 1),0.005,'ByRows',true);
-
-
-%% Solve error for all of the initial guesses.
-for i = 1:size(initGuessData,1)
-    if (mod(i,50000) == 0)
-        disp(strcat(int2str(i), ' iteration'));
-    end
-    initGuessData(i,(2*N) + 2) = ViscoErrFuncIncDist(initGuessData(i,1:(2*N) + 1), AllData);
-end
-%% Construct the inital gene pool
-%perform the selection operation
-[~, idx]=sort(initGuessData(:,(2*N) + 2));
-currentPool = initGuessData(idx,:);
-
-
-%% Initialise the genetic loop for the correct number of generations
+function currentPool = GeneticIterator(currentPool, N, numIts, numInGen, minError, AllData)
 errorIt = zeros(numIts + 1, 1);
+ovSiz = size(currentPool,2) - 1;
+N = (ovSiz - 1) / 2;
+
 for i = 1:numIts
-    if (mod(i, 20) == 0)
-        disp(strcat(int2str(i), ' genetic iteration'));
-    end
+%     if (mod(i, 20) == 0)
+%         disp(strcat(int2str(i), ' genetic iteration'));
+%     end
     
     %add a check for current minimum error once rance of errors defined.
     if (currentPool(1,(2*N) + 2) < minError)
@@ -66,7 +34,7 @@ for i = 1:numIts
     
     
     %create a random set to include to improve diversity of results
-    randoSet = DataSetTool(inErr, 10000, 0);
+    randoSet = DataSetTool(currentPool(1,1:(2*N)+1), 100, 0);
     randoSet = uniquetol(randoSet,0.01,'ByRows',true);
     for j = 1:size(randoSet,1)
         randoSet(j,(2*N) + 2) = ViscoErrFuncIncDist(randoSet(j,1:(2*N) + 1), AllData);
@@ -92,11 +60,9 @@ for i = 1:numIts
     top = currentPool(1,:);
     
     %take out duplicate results based on tolerances
-    currentPool = uniquetol(currentPool,0.005,'ByRows',true);
+    currentPool = uniquetol(currentPool,0.001,'ByRows',true);
     currentPool = [top;currentPool];
     errorIt(i,1) = top(1,(2*N) + 2);
 end
 [~, idx]=sort(currentPool(:,(2*N) + 2));
 currentPool = currentPool(idx,:);
-errorIt(i+1,1) = currentPool(1,(2*N) + 2);
-bestParam = currentPool(1,1:(2*N) + 1);

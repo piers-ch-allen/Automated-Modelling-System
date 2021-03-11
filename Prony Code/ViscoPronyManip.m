@@ -12,16 +12,16 @@ end
 %% Single point crossover
 rng('default');
 rng(sum(100*clock));
+randNum = rand(quartile, 3);    
 singleDataSet = zeros(quartile, siz);
-
 i = 1;
 while i < quartile
     %Generate random seeds for crossover
-    crossOverPoint = floor(mod(abs(randn(1)),1) * siz);
+    crossOverPoint = ceil(mod(randNum(i,1),1) * siz);
     Parent1 = 0; Parent2 = 0;
     while(Parent1 == 0 || Parent2 == 0) 
-        Parent1 = ceil(mod(abs(randn(1)),1) * num);
-        Parent2 = ceil(mod(abs(randn(1)),1) * num);
+        Parent1 = ceil(mod(randNum(i,2),1) * num);
+        Parent2 = ceil(mod(randNum(i,3),1) * num);
         if (Parent1 == Parent2)
             Parent2 = abs(num - Parent2);
             if Parent2 == 0
@@ -45,43 +45,47 @@ while i < quartile
     if(crossOverPoint > (N + 2))
         %ensure time are ordered correctly
         singleDataSet(i-1,:) = [singleDataSet(i-1,1:N + 1),sort(singleDataSet(i-1,N+2:siz))];
-        singleDataSet(i,:) = [singleDataSet(i-1,1:N + 1),sort(singleDataSet(i-1,N+2:siz))];
+        singleDataSet(i,:) = [singleDataSet(i-1,1:N + 1),sort(singleDataSet(i,N+2:siz))];
     end
     
     %perform check on g values
 
     singleDataSet(i-1,1:siz) = GChecker(singleDataSet(i-1,1:siz));
-    singleDataSet(i,1:siz) = GChecker(singleDataSet(i-1,1:siz));
+    singleDataSet(i,1:siz) = GChecker(singleDataSet(i,1:siz));
     i = i + 1;
 end
 
 %% K point crossover
 rng('default');
 rng(sum(100*clock));
+randNum = rand(quartile, N + 4);  
 kDataSet = zeros(quartile, siz);
 
 i = 1;
 while i < quartile
     % generate the k points of crossover
-    k = ceil(mod(abs(randn(1)),1) * 4);
+    k = ceil(mod(abs(randn(1)),1) * (N-1));
     while k >= (2*N) + 1
         k = k - 1;
     end
     points = zeros(1,k);
+    count = 2;
     for j = 1:k
-        temp = ceil(mod(abs(randn(1)),1) * siz);
+        temp = ceil(mod(randNum(i,j+count),1) * siz);
         while(ismember(temp, points))
-            temp = ceil(mod(abs(randn(1)),1) * siz);
+            count = count + 1;
+            temp = ceil(mod(randNum(i,j+count),1) * siz);
         end
         points(1,j) = temp;
+        count = 2;
     end
     
-    %generate the parents
+    %generate the parents    
     Parent1 = 0; Parent2 = 0;
     while(Parent1 == 0 || Parent2 == 0) 
-        Parent1 = ceil(mod(abs(randn(1)),1) * num);
-        Parent2 = ceil(mod(abs(randn(1)),1) * num);
-        if (Parent1 == Parent2)       
+        Parent1 = ceil(mod(randNum(i,1),1) * num);
+        Parent2 = ceil(mod(randNum(i,2),1) * num);
+        if (Parent1 == Parent2)
             Parent2 = abs(num - Parent2);
             if Parent2 == 0
                 if Parent1 == num
@@ -92,8 +96,9 @@ while i < quartile
             end
         end
     end
-    Parent1 = top100(Parent1,:);
-    Parent2 = top100(Parent2,:);
+    Parent1 = top100(Parent1,1:siz);
+    Parent2 = top100(Parent2,1:siz);
+    
     
     %perform the k crossover
     points = sort(points);
@@ -113,8 +118,14 @@ while i < quartile
     end
     %perform the final crossover of each set.
     if(size(points,2) == 1 || points(1,k) < siz)
-        temp1(1,prevVal:siz) = Parent2(1,prevVal:siz);
-        temp2(1,prevVal:siz) = Parent1(1,prevVal:siz);
+        a = (-1) ^ (k + 1);
+        if(a > 0)
+            temp1(1,prevVal:siz) = Parent1(1,prevVal:siz);
+            temp2(1,prevVal:siz) = Parent2(1,prevVal:siz);
+        else
+            temp1(1,prevVal:siz) = Parent2(1,prevVal:siz);
+            temp2(1,prevVal:siz) = Parent1(1,prevVal:siz);           
+        end
     end
     
     %ensure time are ordered correctly

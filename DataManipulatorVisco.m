@@ -21,15 +21,4 @@ else
 end
 
 %% Write new values to the Abacus Variables file.
-Gvalues = zeros(numInGen * 3,1); Tvalues = zeros(numInGen * 3,1); count = 1;
-for i = 1:numInGen
-    Gvalues(count,1) = dataManip(i,2); Tvalues(count,1) = dataManip(i,5); count = count + 1;
-    Gvalues(count,1) = dataManip(i,3); Tvalues(count,1) = dataManip(i,6); count = count + 1;
-    Gvalues(count,1) = dataManip(i,4); Tvalues(count,1) = dataManip(i,7); count = count + 1;
-end
-
-filename = strcat(pwd, '\Prony Code\AbacusVariablesVisco.xlsx');
-loc = strcat('B1:B',int2str(numInGen * 3));
-writematrix(Gvalues,filename,'Sheet',1,'Range',loc);
-loc = strcat('D1:D',int2str(numInGen * 3));
-writematrix(Tvalues,filename,'Sheet',1,'Range',loc);
+viscoVariableWriteToFile(dataManip, numInGen, N);

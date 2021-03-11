@@ -1,11 +1,19 @@
 import abaqus
 import abaqusConstants as aq
-from numpy import *
+import numpy 
 execfile('LoopVar.py')
 currOgdenParam = OgdenParams[OgdenVal-1]
 a = "Visco"
 b = str(ViscoVal)
-exec("currViscoParam = " + a + b)
+exec("currViscoParam = " + a + b )
+#currViscoParam = numpy.transpose(currViscoParam)
+import sys
+current = []
+for x in range(0,len(currViscoParam)):
+    sub = []
+    for y in range(0,len(currViscoParam[1])):
+        sub.append(currViscoParam[y][x])
+    current.append(sub)
 
 ## Define the material properties to the part and add the material section defintion.
 # Linear Elastic
@@ -28,14 +36,14 @@ exec("currViscoParam = " + a + b)
 #    n=3, table=[(-26133000,2.719,12922000,3.996,13227000,1.504,0,0,0),])
 #myCartMat3.Viscoelastic(domain=aq.TIME, time=aq.PRONY, table=((0.744, 0.978, 13.3), ))
 #mySection = myModel.HomogeneousSolidSection(material='PronyViscoElastic1',
-#       name='Section-Cartilage-Prony', thickness=None)
+#       name='Section-Cartilage-Prony3', thickness=None)
 
 #Prony Visco Elastic Model x1
 myCartMat4 = myModel.Material(name='PronyViscoElastic1')
 myCartMat4.Density(table=((1.1E-09, ), ))
 myCartMat4.Hyperelastic(type=aq.OGDEN, testData = aq.OFF, moduliTimeScale=aq.LONG_TERM,
     n=3, table=((currOgdenParam),))
-myCartMat4.Viscoelastic(domain=aq.TIME, time=aq.PRONY, table = (currViscoParam))
+myCartMat4.Viscoelastic(domain=aq.TIME, time=aq.PRONY, table = current )
 mySection2 = myModel.HomogeneousSolidSection(material='PronyViscoElastic1',
      name='Section-Cartilage-Prony3', thickness=None)
 
