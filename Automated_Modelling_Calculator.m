@@ -1,4 +1,4 @@
-function Automated_Modelling_Calculator(numIterations, N)
+function output = Automated_Modelling_Calculator(numIterations, N)
 %%Function to provide the parent class of the Automated modelling process
 % Itdoes inital data calculation and then provides a framework for
 % rerunning the process until a convergence is met.

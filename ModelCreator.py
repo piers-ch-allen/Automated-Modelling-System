@@ -76,7 +76,7 @@ InitStep = myModel.StaticStep(name='rampLoad', previous='Initial', nlgeom=ON,
     continueDampingFactors=True, adaptiveDampingRatio=0.05,
     description='Ramp load the top face of the cartilage.')
 myModel.ViscoStep(name='cyclicLoad', 
-        previous='rampLoad',nlgeom=ON, timePeriod=3.0, maxNumInc=100000, 
+        previous='rampLoad',nlgeom=ON, timePeriod=1.0, maxNumInc=100000, 
         stabilizationMethod=aq.DISSIPATED_ENERGY_FRACTION, 
         continueDampingFactors=True, adaptiveDampingRatio=0.05, 
         initialInc=0.01, minInc=3e-05, maxInc=0.01, cetol=100000.0, 
