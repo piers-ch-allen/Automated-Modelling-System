@@ -58,7 +58,7 @@ end
 %% K point crossover
 rng('default');
 rng(sum(100*clock));
-randNum = rand(quartile, N + 4);  
+randNum = rand(quartile, N + 2);  
 kDataSet = zeros(quartile, siz);
 
 i = 1;
@@ -69,15 +69,12 @@ while i < quartile
         k = k - 1;
     end
     points = zeros(1,k);
-    count = 2;
     for j = 1:k
-        temp = ceil(mod(randNum(i,j+count),1) * siz);
+        temp = ceil(mod(randNum(i,j+2),1) * siz);
         while(ismember(temp, points))
-            count = count + 1;
-            temp = ceil(mod(randNum(i,j+count),1) * siz);
+            temp = ceil(mod(rand,1) * siz);
         end
         points(1,j) = temp;
-        count = 2;
     end
     
     %generate the parents    
@@ -145,30 +142,35 @@ mutationDataSet = zeros(quartile*2, siz);
 
 %Gaussian mutation on g values
 %set up distribution variables
-MU_G_g_Nt = [mean(top100(:,1)),mean(mean(top100(:,2:(N+1)))),mean(top100(:,(N+2):siz))];
+top100G1 = rmoutliers(top100(:,1));
+MU_G_g_Nt = [mean(top100G1),mean(top100(:,2:(N+1))),mean(top100(:,(N+2):siz))];
 gvals = top100(:,2:(N+1));
-STD_G_g_Nt = [std(top100(:,1)), std(reshape(gvals, 1, N*num)), std(top100(:,(N+2):siz))];
+STD_G_g_Nt = [std(top100G1), std(gvals), std(top100(:,(N+2):siz))];
 pDs = cell(1,size(MU_G_g_Nt,2));
 for i = 1:size(MU_G_g_Nt,2)
     pDs{1,i} = makedist('Normal','mu',MU_G_g_Nt(1,i),'sigma',STD_G_g_Nt(1,i));
 end
-i = siz;
-while i > N+1
-    pDs{1,i} = pDs{1,(i - N + 1)}; 
-    pDs{1,(i - N + 1)} = pDs{1,2};
-    i = i - 1;
-end
 
+%Dunno what this is here for, may delete.
+% i = siz;
+% while i > N+1
+%     pDs{1,i} = pDs{1,(i - N + 1)}; 
+%     pDs{1,(i - N + 1)} = pDs{1,2};
+%     i = i - 1;
+% end
+
+
+randNum = rand(quartile*2,(2*N) + 2);   
 %perform the mutations
 for i = 1:quartile*2
     %Choose parent
-    Parent = top100(ceil(mod(abs(randn(1)),1) * num),:);
+    Parent = top100(ceil(mod(randNum(i,1),1) * num),:);
     for j = 1:siz
         %Chance of mutation is 1/length of array
-        mutChance = ceil(mod(abs(randn(1)),1)*siz);
+        mutChance = ceil(randNum(i,j+1)*siz);
         if(mutChance == 1)
             r = random(pDs{1,j}) - pDs{1,j}.mu;
-            Parent(1,j) = Parent(1,j) + r;
+            Parent(1,j) = abs(Parent(1,j) + r);
         end
     end
     %check time values are correct order

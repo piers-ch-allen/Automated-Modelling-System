@@ -54,10 +54,10 @@ elseif importType == 2
 elseif importType == 3
     AbacusVariablesVisco = readcell(dir + "\Prony Code\AbacusVariablesVisco.xlsx");
     siz = size(AbacusVariablesVisco,1);
-    ViscoVariables = cell(1,siz/3);
+    ViscoVariables = cell(1,siz/N);
     viscoCount = 1;
     for i = 1:siz/N
-        ViscoVariables{1,viscoCount} = cell2mat(AbacusVariablesVisco(N*(i-1)+1:N*(i-1)+N,2:N+1));
+        ViscoVariables{1,viscoCount} = cell2mat(AbacusVariablesVisco(N*(i-1)+1:N*(i-1)+N,2:4));
         viscoCount = viscoCount + 1;
     end
     %% Clear temporary variables

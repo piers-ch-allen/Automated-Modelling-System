@@ -33,6 +33,14 @@ for i = 1:N
         values2check2(1,i) = 1;
     end
 end
+if N > 1
+    for i = 2:N
+        if values2check2(1,i) == values2check2(1,i-1)
+            values2check2(1,i-1) = values2check2(1,i-1) + (0.1*i);
+        end
+    end
+end
+values2check2=sort(values2check2);
 
 output = input;
 output = [output(1,1),values2check,values2check2];

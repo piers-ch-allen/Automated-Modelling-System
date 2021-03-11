@@ -60,8 +60,6 @@ for i = 1:numIts
     top = currentPool(1,:);
     
     %take out duplicate results based on tolerances
-    currentPool = uniquetol(currentPool,0.001,'ByRows',true);
-    currentPool = [top;currentPool];
     errorIt(i,1) = top(1,(2*N) + 2);
 end
 [~, idx]=sort(currentPool(:,(2*N) + 2));

@@ -48,18 +48,20 @@ disp('Initial dataset produced from guess including random and defined permutati
 %perform an initial genetic run of small number of generations to imrove
 %starting results
 modelSolutions = GeneticIterator(modelSolutions, N, 50, 5000, minErr, AllData);
-starta = 0; enda = 0;
-for i = 1:size(modelSolutions,1)
-    if starta == 0 && modelSolutions(i,(2*N)+2) == 336
-        starta = i;
-    elseif modelSolutions(i,(2*N)+2) == 336
-        enda = i;
-    end
+
+%retrieve unique solutions 
+top = modelSolutions(1,:);
+modelSolutions = uniquetol(modelSolutions(:,1:(2*N) + 1),0.05,'ByRows',true);
+for j = 1:size(modelSolutions,1)
+    modelSolutions(j,(2*N) + 2) = ViscoErrFuncIncDist(modelSolutions(j,1:(2*N) + 1), AllData);
 end
-modelSolutions = [modelSolutions(1:starta-1,:); modelSolutions(enda+1:size(modelSolutions,1),:)];
+[~, idx]=sort(modelSolutions(:,(2*N) + 2));
+modelSolutions = [top;modelSolutions(idx,:)];
+
 top10 = modelSolutions(1:10,1:(2*N) + 1);
 %save inital material parameter data
 viscoVariableWriteToFile(top10, numInGen, N);
+
 %% Start loop for error cacluation and generation of new model possibilities
 %% Start iteration loop for model convergence
 %iterate through a number of model creations and data changes until a level
@@ -68,29 +70,29 @@ viscoVariableWriteToFile(top10, numInGen, N);
 output = MainMultiple(iterCount, N);
 disp('First set of model runs completed, automations of run starting now.')
 
-while (iterCount < numIterations && convergence == false)
-    %calculate the error on the models for eacg set of associated parameters
-    for i = 1:numInGen
-        visOut{i,1} = output{1,1,1,i};
-        %error = blah blah blah
-        %create a new dataset populated by variations of the optimal
-        %solutions proporionate to there ranking.
-    end
-        
-    %perform model calculations on the curent dataSet
-    [convergence, bestData] = DataManipulatorVisco(initData, AllData, bestData, bestCount);
-    %increase iteration nunmber
-    iterCount = iterCount + 1;
-    output = MainMultiple(iterCount);
-end
-
-
-
-%perform data changes based on outputs and save over data file.
-[convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
-%gather displacement data from the solved models
-output = MainMultiple(1);
-iterCount = 2;
+% while (iterCount < numIterations && convergence == false)
+%     %calculate the error on the models for eacg set of associated parameters
+%     for i = 1:numInGen
+%         visOut{i,1} = output{1,1,1,i};
+%         %error = blah blah blah
+%         %create a new dataset populated by variations of the optimal
+%         %solutions proporionate to there ranking.
+%     end
+%         
+%     %perform model calculations on the curent dataSet
+%     [convergence, bestData] = DataManipulatorVisco(initData, AllData, bestData, bestCount);
+%     %increase iteration nunmber
+%     iterCount = iterCount + 1;
+%     output = MainMultiple(iterCount);
+% end
+% 
+% 
+% 
+% %perform data changes based on outputs and save over data file.
+% [convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
+% %gather displacement data from the solved models
+% output = MainMultiple(1);
+% iterCount = 2;
 
 
 %% Do something with the output results after iterations are completed 

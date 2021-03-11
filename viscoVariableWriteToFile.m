@@ -16,6 +16,10 @@ for  i = 0:numInGen - 1
 end
 
 %create and save values to the visco parameter files.
+files = strcat(pwd, '\Prony Code\AbacusVariablesVisco.xlsx');
+if isfile(files)
+    delete (files);
+end
 filename = strcat(pwd, '\Prony Code\AbacusVariablesVisco.xlsx');
 writecell(names, filename,'Sheet',1,'Range','A1');
 writematrix(data, filename,'Sheet',1,'Range','B1');

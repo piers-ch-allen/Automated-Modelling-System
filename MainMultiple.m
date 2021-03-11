@@ -84,16 +84,16 @@ for numOg = 1:size(viscoP,2)
     name = strcat('Visco', int2str(numOg) ,' = (');
     fprintf(fid2,name);
     vis = viscoP{1,numOg};
-    for i = 1:(size(vis,1))
+    for i = 1:(size(vis,2))
         fprintf(fid2,'('); 
-        for j = 1:(size(vis,2))
+        for j = 1:(size(vis,1))
             fprintf(fid2,'%0.8f', vis(j,i));
-            if(j ~= size(vis,2))
+            if(j ~= size(vis,1))
                 fprintf(fid2,','); 
             end
         end
         fprintf(fid2,')');
-        if(i ~= size(vis,1))
+        if(i ~= size(vis,2))
             fprintf(fid2,','); 
         end
     end

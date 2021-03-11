@@ -9,9 +9,9 @@ exec("currViscoParam = " + a + b )
 #currViscoParam = numpy.transpose(currViscoParam)
 import sys
 current = []
-for x in range(0,len(currViscoParam)):
+for x in range(0,len(currViscoParam[1])):
     sub = []
-    for y in range(0,len(currViscoParam[1])):
+    for y in range(0,len(currViscoParam)):
         sub.append(currViscoParam[y][x])
     current.append(sub)
 
