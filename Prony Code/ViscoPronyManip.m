@@ -12,10 +12,14 @@ end
 %% Single point crossover
 rng('default');
 rng(sum(100*clock));
-randNum = rand(quartile, 3);    
-singleDataSet = zeros(quartile, siz);
+checks = 1;
+if N == 1
+    checks = 2;
+end
+randNum = rand(quartile * checks, 3);    
+singleDataSet = zeros(quartile * checks, siz);
 i = 1;
-while i < quartile
+while i < (quartile * checks)
     %Generate random seeds for crossover
     crossOverPoint = ceil(mod(randNum(i,1),1) * siz);
     Parent1 = 0; Parent2 = 0;
@@ -58,11 +62,16 @@ end
 %% K point crossover
 rng('default');
 rng(sum(100*clock));
-randNum = rand(quartile, N + 2);  
-kDataSet = zeros(quartile, siz);
+if N == 1
+    checks = 0;
+else 
+    checks = 1;
+end
 
+randNum = rand(quartile * checks, N + 2);  
+kDataSet = zeros(quartile * checks, siz);
 i = 1;
-while i < quartile
+while i < quartile * checks
     % generate the k points of crossover
     k = ceil(mod(abs(randn(1)),1) * (N-1));
     while k >= (2*N) + 1

@@ -67,7 +67,7 @@ viscoVariableWriteToFile(top10, numInGen, N);
 %iterate through a number of model creations and data changes until a level
 %of convergence is reached.
 %Run the initial models based on first set of inputs.
-output = MainMultiple(iterCount, N);
+output = MainMultiple(numIterations, N);
 disp('First set of model runs completed, automations of run starting now.')
 
 % while (iterCount < numIterations && convergence == false)
