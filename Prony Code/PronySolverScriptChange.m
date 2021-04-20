@@ -2,13 +2,14 @@
 function ErrorSet = PronySolverScriptChange(dat, N)
 % script will run a user defined number of random interations to get the
 % optimal set of paramters
-NumIterations = 100;
+NumIterations = 500;
 %set number of prony parameters
 %create a result cell of result sets to work with of a defined number of
 %overall runs of the optimisation step
 AllSolutions = cell(1,3);
 Solutions = zeros(NumIterations, 2+(N*2));
 %Initialise the loop to find optimal solution.
+warning('off','MATLAB:nearlySingularMatrix')
 for i = 1 : NumIterations
     fun = @(x)ViscoErrFuncIncDist(x,dat);
     rng('default');
@@ -43,7 +44,7 @@ for i = 1 : NumIterations
     B(1,1) = 1;
     if(N > 1)
         for d = 1:N-1
-            A(d+1,N+d+1) = 1*ceil(rand(1) * 2)+0.5;
+            A(d+1,N+d+1) = 1*ceil(rand(1) * 2)+1;
             A(d+1,N+d+2) = -1;
             B(d+1,1) = 0;
         end
@@ -58,6 +59,7 @@ for i = 1 : NumIterations
 %         disp(a);
 %     end
 end
+warning('on','MATLAB:nearlySingularMatrix')
 AllSolutions{1,1} = Solutions;
 [a,b] = min(Solutions(:,1));
 AllSolutions{1,2} = a;

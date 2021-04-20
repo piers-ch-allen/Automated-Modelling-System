@@ -68,31 +68,54 @@ viscoVariableWriteToFile(top10, numInGen, N);
 %of convergence is reached.
 %Run the initial models based on first set of inputs.
 output = MainMultiple(numIterations, N);
+load('ValidationData.mat');
 disp('First set of model runs completed, automations of run starting now.')
 
-% while (iterCount < numIterations && convergence == false)
-%     %calculate the error on the models for eacg set of associated parameters
-%     for i = 1:numInGen
-%         visOut{i,1} = output{1,1,1,i};
-%         %error = blah blah blah
-%         %create a new dataset populated by variations of the optimal
-%         %solutions proporionate to there ranking.
-%     end
-%         
-%     %perform model calculations on the curent dataSet
-%     [convergence, bestData] = DataManipulatorVisco(initData, AllData, bestData, bestCount);
-%     %increase iteration nunmber
-%     iterCount = iterCount + 1;
-%     output = MainMultiple(iterCount);
-% end
-% 
-% 
-% 
-% %perform data changes based on outputs and save over data file.
-% [convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
-% %gather displacement data from the solved models
-% output = MainMultiple(1);
-% iterCount = 2;
+while (iterCount < numIterations && convergence == false)
+    %calculate the error on the models for eacg set of associated parameters
+    outputData = cell(1,10);
+    for i = 1:10
+        try
+            data = output{:,:,1,i};
+            x = data(:,1)'; disp = data(:,2)'; force = data(:,3)';
+            %find location of end of step 1 and its force to define ramp data
+            idx = find(x==1,1,'first');
+            curForScal = 1255000 / force(1,idx);
+            rampData = [x(1,1:idx);curForScal*disp(1,1:idx);curForScal*force(1,1:idx)];
+            
+            %find min and max of cyclic data to normalise values
+            siz = size(data,1);
+            cycData = [x(1,idx:siz);curForScal*disp(1,idx:siz);curForScal*force(1,idx:siz)];
+            Maxidx = find(cycData(3,:)==max(cycData(3,:)),1,'first');
+            Minidx = find(cycData(3,:)==min(cycData(3,:)),1,'first');
+            cycData = cycData(:,Maxidx:Minidx);
+            
+            %normalise the displacement
+            cycData(2,:) = cycData(2,:) - min(cycData(2,:));
+        catch
+            
+        end
+        outputData{1,i} = {rampData;cycData};
+    end
+    err = modelErr(outputData, rampTestData, hystCompAverage);
+    
+    %based on model performance, generate a new set of models to be test
+    %.......
+    %save new models to file 
+    %viscoVariableWriteToFile(top10, numInGen, N);
+        
+    %perform model calculations on the curent dataSet
+    iterCount = iterCount + 1;
+    output = MainMultiple(iterCount);
+end
+
+
+
+%perform data changes based on outputs and save over data file.
+[convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
+%gather displacement data from the solved models
+output = MainMultiple(1);
+iterCount = 2;
 
 
 %% Do something with the output results after iterations are completed 

@@ -24,7 +24,12 @@ end
 %check the values:
 if sum(values2check) >= 1
     values2check = values2check / sum(values2check);
+    if sum(values2check) == 1
+       [~,b] = max(values2check); 
+       values2check(b) = values2check(b) - 0.01;
+    end
 end
+
 
 %check the time values.
 values2check2 = abs(input(1,N+2:N+N+1));
@@ -35,8 +40,8 @@ for i = 1:N
 end
 if N > 1
     for i = 2:N
-        if values2check2(1,i) == values2check2(1,i-1)
-            values2check2(1,i-1) = values2check2(1,i-1) + (0.1*i);
+        if (values2check2(1,i) - 2 * values2check2(1,i-1)) < 0
+            values2check2(1,i) = (2 *values2check2(1,i-1)) + rand(1);
         end
     end
 end

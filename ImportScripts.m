@@ -22,12 +22,12 @@ if importType == 1
 elseif importType == 2 
     opts = delimitedTextImportOptions("NumVariables", 2);
     % Specify range and delimiter
-    opts.DataLines = [2, Inf];
+    opts.DataLines = [3, Inf];
     opts.Delimiter = " ";
 
     % Specify column names and types
-    opts.VariableNames = ["VarName1", "VarName2"];
-    opts.VariableTypes = ["double", "double"];
+    opts.VariableNames = ["VarName1", "VarName2", "VarName3"];
+    opts.VariableTypes = ["double", "double", "double"];
 
     % Specify file level properties
     opts.ExtraColumnsRule = "ignore";
@@ -48,6 +48,7 @@ elseif importType == 2
     end
     %% Convert to output type
     AbacusVariables = temp;
+    AbacusVariables(sum(isnan(AbacusVariables), 2) >= 1, :) = [];
 
     %% Clear temporary variables
     clear opts
