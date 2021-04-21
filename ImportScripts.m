@@ -22,12 +22,12 @@ if importType == 1
 elseif importType == 2 
     opts = delimitedTextImportOptions("NumVariables", 2);
     % Specify range and delimiter
-    opts.DataLines = [3, Inf];
+    opts.DataLines = [4, Inf];
     opts.Delimiter = " ";
 
     % Specify column names and types
-    opts.VariableNames = ["VarName1", "VarName2", "VarName3"];
-    opts.VariableTypes = ["double", "double", "double"];
+    opts.VariableNames = ["VarName1", "VarName2", "VarName3", "VarName4"];
+    opts.VariableTypes = ["double", "double", "double","double"];
 
     % Specify file level properties
     opts.ExtraColumnsRule = "ignore";

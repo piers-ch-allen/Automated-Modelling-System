@@ -79,25 +79,34 @@ while (iterCount < numIterations && convergence == false)
             data = output{:,:,1,i};
             x = data(:,1)'; disp = data(:,2)'; force = data(:,3)';
             %find location of end of step 1 and its force to define ramp data
-            idx = find(x==1,1,'first');
-            curForScal = 1255000 / force(1,idx);
-            rampData = [x(1,1:idx);curForScal*disp(1,1:idx);curForScal*force(1,1:idx)];
-            
+            idx = find(x==1.05,1,'first');
+            a = 1255000;
+            rampData = [a*(x(1,3:idx)-0.05); 10000*disp(1,3:idx)];
+
             %find min and max of cyclic data to normalise values
             siz = size(data,1);
-            cycData = [x(1,idx:siz);curForScal*disp(1,idx:siz);curForScal*force(1,idx:siz)];
-            Maxidx = find(cycData(3,:)==max(cycData(3,:)),1,'first');
-            Minidx = find(cycData(3,:)==min(cycData(3,:)),1,'first');
-            cycData = cycData(:,Maxidx:Minidx);
+            cycData = [a*(x(1,idx+1:siz)-0.05);10000*disp(1,idx+1:siz)];
+            sizC = size(cycData,2);
+            %min displacement
+            minD = min(cycData(2,:));
+            cycData(2,:) = cycData(2,:) - minD;
+
+            %define loading profile
+            t = linspace(1,2,sizC); 
+            funcs=1.225+0.493*sin(6.28*t);
+            cycData(1,:) = funcs;
+            Maxidx = find(funcs(1,:)==max(funcs(1,:)));
+            Minidx = find(funcs(1,:)==min(funcs(1,:)));
+            cycDataUpper = [cycData(:,Minidx+1:sizC),cycData(:,1:Maxidx)];
+            cycDataLower = cycData(:,Maxidx+1:Minidx);
             
-            %normalise the displacement
-            cycData(2,:) = cycData(2,:) - min(cycData(2,:));
+            %save data to be evaluated;
+            outputData{1,i} = {rampData;cycData};
         catch
-            
+            outputData{1,i} = [];
         end
-        outputData{1,i} = {rampData;cycData};
     end
-    err = modelErr(outputData, rampTestData, hystCompAverage);
+    err = modelErr(outputData, newRampData, hystCompAverage);
     
     %based on model performance, generate a new set of models to be test
     %.......
@@ -118,5 +127,5 @@ output = MainMultiple(1);
 iterCount = 2;
 
 
-%% Do something with the output results after iterations are completed 
-% or a convergence is met
+% Do something with the output results after iterations are completed 
+or a convergence is met

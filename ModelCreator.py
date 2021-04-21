@@ -71,7 +71,12 @@ assemblyBottom = myModel.rootAssembly.instances['CartInstance'].sets['Bottom']
 # Create a step. The time period of the static step is 1.0, 
 # and the initial incrementation is 0.1; the step is created
 # after the initial step. 
-InitStep = myModel.StaticStep(name='rampLoad', previous='Initial', nlgeom=ON,
+InitStep = myModel.StaticStep(name='preLoad', 
+        previous='Initial', description='preload of sample', timePeriod=0.05, 
+        stabilizationMethod=aq.DISSIPATED_ENERGY_FRACTION, 
+        continueDampingFactors=True, adaptiveDampingRatio=0.05, 
+        initialInc=0.05, minInc=5e-07, maxInc=0.05, amplitude=aq.STEP, nlgeom=ON)
+InitStep = myModel.StaticStep(name='rampLoad', previous='preLoad', nlgeom=ON,
     timePeriod=1, initialInc=0.01,minInc=1E-08, maxInc=1,maxNumInc=10000000,
     continueDampingFactors=True, adaptiveDampingRatio=0.05,
     description='Ramp load the top face of the cartilage.')
