@@ -73,7 +73,7 @@ disp('First set of model runs completed, automations of run starting now.')
 
 while (iterCount < numIterations && convergence == false)
     %calculate the error on the models for eacg set of associated parameters
-    outputData = cell(1,10);
+    outputData = cell(2,10);
     for i = 1:10
         try
             data = output{:,:,1,i};
@@ -101,9 +101,11 @@ while (iterCount < numIterations && convergence == false)
             cycDataLower = cycData(:,Maxidx+1:Minidx);
             
             %save data to be evaluated;
-            outputData{1,i} = {rampData;cycData};
+            outputData{1,i} = rampData;
+            outputData{2,i} = cycData;
         catch
             outputData{1,i} = [];
+            outputData{2,i} = [];
         end
     end
     err = modelErr(outputData, newRampData, hystCompAverage);
