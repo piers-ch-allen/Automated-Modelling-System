@@ -22,14 +22,13 @@ for i = 1:size(values2check,2)
 end
 
 %check the values:
-if sum(values2check) >= 1
+if sum(values2check) >= 0.9999
     values2check = values2check / sum(values2check);
-    if sum(values2check) == 1
+end
+    while sum(values2check) == 1
        [~,b] = max(values2check); 
        values2check(b) = values2check(b) - 0.01;
     end
-end
-
 
 %check the time values.
 values2check2 = abs(input(1,N+2:N+N+1));

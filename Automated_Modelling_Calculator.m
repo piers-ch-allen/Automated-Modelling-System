@@ -11,7 +11,7 @@ function output = Automated_Modelling_Calculator(numIterations, N)
 addpath('Prony Code')
 load('dataStart.mat');
 bestCount = 1; genCount = 1; maxGens = 100; convergence = false;
-numInGen = 10; minErr = 0; inErr = 10000; iterCount = 1;
+numInGen = 20; minErr = 0; inErr = 10000; iterCount = 1;
 initError = PronySolverScriptChange(AllData, N);
 [~, idx]=sort(initError{1,1}(:,(2*N) + 2));
 initError{1,1} = initError{1,1}(idx,:);
@@ -19,7 +19,7 @@ disp('Finished gathering initial solutions from phase 1')
 
 %initError = errOut;
 %Create initial guesses
-initGuessData = DataSetTool(initError{1,3}, 25, 1);
+initGuessData = DataSetTool(initError{1,3}, 50, 1);
 %solve prony error for all initial values
 [its, dataSiz] = size(initGuessData);
 for i = 1:its
@@ -36,13 +36,18 @@ for i = 1:size(temp,1)
 end
 
 %take 50 random choices to ensure diversity
+initError{1,1} = unique(round(initError{1,1},4), 'rows');
 order = linspace(1,size(initError{1,1},1) - 25,size(initError{1,1},1) - 25);
 order = order(randperm(length(order)));
 temp = initError{1,1}(26:size(initError{1,1},1),:);
 random50 = temp(order(1,:),:);
 
 %combine the data sets
-modelSolutions = [initGuessData;random50(1:25,:)];
+if size(random50, 2) >= 25
+    modelSolutions = [initGuessData;random50(1:25,:)];
+else
+    modelSolutions = [initGuessData;random50];
+end
 disp('Initial dataset produced from guess including random and defined permutations.')
 
 %perform an initial genetic run of small number of generations to imrove
@@ -58,9 +63,9 @@ end
 [~, idx]=sort(modelSolutions(:,(2*N) + 2));
 modelSolutions = [top;modelSolutions(idx,:)];
 
-top10 = modelSolutions(1:10,1:(2*N) + 1);
+topVals = modelSolutions(1:20,1:(2*N) + 1);
 %save inital material parameter data
-viscoVariableWriteToFile(top10, numInGen, N);
+viscoVariableWriteToFile(topVals, numInGen, N);
 
 %% Start loop for error cacluation and generation of new model possibilities
 %% Start iteration loop for model convergence
@@ -68,13 +73,13 @@ viscoVariableWriteToFile(top10, numInGen, N);
 %of convergence is reached.
 %Run the initial models based on first set of inputs.
 output = MainMultiple(numIterations, N);
-load('ValidationData.mat');
+load('errorCalcData.mat');
 disp('First set of model runs completed, automations of run starting now.')
 
 while (iterCount < numIterations && convergence == false)
     %calculate the error on the models for eacg set of associated parameters
-    outputData = cell(2,10);
-    for i = 1:10
+    outputData = cell(3,size(output,4));
+    for i = 1:size(output, 4)
         try
             data = output{:,:,1,i};
             x = data(:,1)'; disp = data(:,2)'; force = data(:,3)';
@@ -102,13 +107,16 @@ while (iterCount < numIterations && convergence == false)
             
             %save data to be evaluated;
             outputData{1,i} = rampData;
-            outputData{2,i} = cycData;
+            outputData{2,i} = cycDataLower;
+            outputData{3,i} = cycDataUpper;
         catch
             outputData{1,i} = [];
             outputData{2,i} = [];
+            outputData{3,i} = [];
         end
     end
-    err = modelErr(outputData, newRampData, hystCompAverage);
+    load('errorCalcData.mat');
+    err = modelErr(outputData, rampData, hystData);
     
     %based on model performance, generate a new set of models to be test
     %.......

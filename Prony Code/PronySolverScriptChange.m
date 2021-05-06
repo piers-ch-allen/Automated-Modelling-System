@@ -10,16 +10,21 @@ AllSolutions = cell(1,3);
 Solutions = zeros(NumIterations, 2+(N*2));
 %Initialise the loop to find optimal solution.
 warning('off','MATLAB:nearlySingularMatrix')
+randArr1 = rand(1,NumIterations);
+pause(1);
+randArr2 = rand(1,NumIterations);
+pause(1);
+randArr3 = rand(1,NumIterations);
 for i = 1 : NumIterations
     fun = @(x)ViscoErrFuncIncDist(x,dat);
     rng('default');
     rng(sum(100*clock));
-    RandSeed = floor(1000 * rand(1) * rand(1));
+    RandSeed = floor(1000 * randArr1(i) * randArr2(i));
     %Define the initialisation components.
     seedArray = ones(1,N);
     seed2Array = ones(1,N);
     for j = 1:N
-        seedArray(1,j) = mod(RandSeed*rand(1) / 100,1);
+        seedArray(1,j) = mod(RandSeed*randArr3(i) / 100,1);
         a = 0;
         while a <= 1
             if (RandSeed > 100)                

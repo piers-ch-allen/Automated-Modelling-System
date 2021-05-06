@@ -53,6 +53,7 @@ for i = 1:numIts
     
     %Solve for all new values
     for j = 1:size(currentPool,1)
+        currentPool(j,1:(2*N) + 1) = GChecker(currentPool(j,1:(2*N) + 1));
         currentPool(j,(2*N) + 2) = ViscoErrFuncIncDist(currentPool(j,1:(2*N) + 1), AllData);
     end
     [~, idx]=sort(currentPool(:,(2*N) + 2));
