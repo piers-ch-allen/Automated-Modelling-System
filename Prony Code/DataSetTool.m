@@ -15,7 +15,6 @@ if(start == 0)
         x0 = zeros(1,(2*N) + 1);
         %set first value
         x0(1,1) = mod(abs(randn(1)),1) * randSeed * 100;
-        
         %define g values for 1 to N ensuring summation to 1
         x0(1,order(1,1)+1) = mod(abs(randn(1)),1) * randSeed;
         totalOrd = x0(1,order(1,1)+1);

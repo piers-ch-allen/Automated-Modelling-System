@@ -72,10 +72,11 @@ viscoVariableWriteToFile(topVals, numInGen, N);
 %iterate through a number of model creations and data changes until a level
 %of convergence is reached.
 %Run the initial models based on first set of inputs.
-output = MainMultiple(numIterations, N);
-load('errorCalcData.mat');
-disp('First set of model runs completed, automations of run starting now.')
-
+output = MainMultiple(numIterations, N);    
+it = strcat('Iteration ',{' '}, int2str(iterCount), ' completed');
+disp(it); iterCount = 2;
+errorTracker = zeros(numIterations, 3);
+numInGen = 100;
 while (iterCount < numIterations && convergence == false)
     %calculate the error on the models for eacg set of associated parameters
     outputData = cell(3,size(output,4));
@@ -118,14 +119,63 @@ while (iterCount < numIterations && convergence == false)
     load('errorCalcData.mat');
     err = modelErr(outputData, rampData, hystData);
     
+    %make a note of all the errors that are optimal with ecah iteration
+    [errorTracker(iterCount, 1), loc1] = min(cell2mat(err{1,1}));
+    [errorTracker(iterCount, 2), loc2] = min(cell2mat(err{1,2}));
+    [errorTracker(iterCount, 3), loc3] = min(cell2mat(err{1,3}));
+    
+    %save optimal solutions
+    currSoz = (2*N) + 1;
+    newTopVals = zeros(1,(2*N) + 1);
+    newTopVals(1:3,:) = [topVals(loc1,1:currSoz);topVals(loc2,1:currSoz);topVals(loc3,1:currSoz)];  
+    
+    %create variations of the optimal solution to be then combined using
+    %the genetic algorithm.
+    checkerVals = zeros(75, (2*N) + 1);
+    checkerVals(1:25, :) = DataSetTool(newTopVals(1,:),24,1);
+    checkerVals(26:50, :) = DataSetTool(newTopVals(2,:),24,1);
+    checkerVals(51:75, :) = DataSetTool(newTopVals(3,:),24,1);    
+    [its, dataSiz] = size(checkerVals);
+    for i = 1:its
+        checkerVals(i,dataSiz+1) = ViscoErrFuncIncDist(checkerVals(i,1:dataSiz), AllData);
+    end
+    
+    %take 27 random permutation of top solutions
+    checkerVals = unique(round(checkerVals,4), 'rows');
+    orders = linspace(1,size(checkerVals,1),size(checkerVals,1));
+    orders = orders(randperm(length(orders)));
+    temp = checkerVals(1:size(checkerVals,1),:);
+    randSelec = temp(orders(1,1:27),:);
+    
+    newTopVals = [newTopVals;randSelec(:,1:7)];
+    topVals = newTopVals;
+    clearvars newTopVals;
+    [its, dataSiz] = size(topVals);
+    for i = 1:its
+        topVals(i,dataSiz+1) = ViscoErrFuncIncDist(topVals(i,1:dataSiz), AllData);
+    end
+    
+    %perform genetic iteration on the 30 samples provided
+    topVals = GeneticIterator(topVals, N, 50, 5000, minErr, AllData);
+    
+    %retrieve unique solutions
+    top = topVals(1,:);
+    topVals = uniquetol(topVals(:,1:(2*N) + 1),0.05,'ByRows',true);
+    for j = 1:size(topVals,1)
+        topVals(j,(2*N) + 2) = ViscoErrFuncIncDist(topVals(j,1:(2*N) + 1), AllData);
+    end
+    [~, idx]=sort(topVals(:,(2*N) + 2));
+    topVals = [top;topVals(idx,:)];
+    
+    %write the new iteration of variables to an excel file.
+    viscoVariableWriteToFile(topVals(1:100,1:(2*N) + 1), numInGen, N);
+    
     %based on model performance, generate a new set of models to be test
-    %.......
-    %save new models to file 
-    %viscoVariableWriteToFile(top10, numInGen, N);
-        
     %perform model calculations on the curent dataSet
-    iterCount = iterCount + 1;
     output = MainMultiple(iterCount);
+    it = strcat('Iteration ',{' '}, int2str(iterCount), ' completed');
+    disp(it);
+    iterCount = iterCount + 1;
 end
 
 
