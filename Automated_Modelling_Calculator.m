@@ -1,4 +1,4 @@
-function output = Automated_Modelling_Calculator(numIterations, N)
+function [output, errorTracker] = Automated_Modelling_Calculator(numIterations, N)
 %%Function to provide the parent class of the Automated modelling process
 % Itdoes inital data calculation and then provides a framework for
 % rerunning the process until a convergence is met.
@@ -15,7 +15,6 @@ numInGen = 20; minErr = 0; inErr = 10000; iterCount = 1;
 initError = PronySolverScriptChange(AllData, N);
 [~, idx]=sort(initError{1,1}(:,(2*N) + 2));
 initError{1,1} = initError{1,1}(idx,:);
-disp('Finished gathering initial solutions from phase 1')
 
 %initError = errOut;
 %Create initial guesses
@@ -48,7 +47,6 @@ if size(random50, 2) >= 25
 else
     modelSolutions = [initGuessData;random50];
 end
-disp('Initial dataset produced from guess including random and defined permutations.')
 
 %perform an initial genetic run of small number of generations to imrove
 %starting results
@@ -72,12 +70,11 @@ viscoVariableWriteToFile(topVals, numInGen, N);
 %iterate through a number of model creations and data changes until a level
 %of convergence is reached.
 %Run the initial models based on first set of inputs.
-output = MainMultiple(numIterations, N);    
-it = strcat('Iteration ',{' '}, int2str(iterCount), ' completed');
-disp(it); iterCount = 2;
+output = MainMultiple(iterCount, N);
+iterCount = iterCount + 1;
 errorTracker = zeros(numIterations, 3);
 numInGen = 100;
-while (iterCount < numIterations && convergence == false)
+while (iterCount <= numIterations && convergence == false)
     %calculate the error on the models for eacg set of associated parameters
     outputData = cell(3,size(output,4));
     for i = 1:size(output, 4)
@@ -168,24 +165,22 @@ while (iterCount < numIterations && convergence == false)
     topVals = [top;topVals(idx,:)];
     
     %write the new iteration of variables to an excel file.
-    viscoVariableWriteToFile(topVals(1:100,1:(2*N) + 1), numInGen, N);
+    viscoVariableWriteToFile(topVals(1:numInGen,1:(2*N) + 1), numInGen, N);
     
     %based on model performance, generate a new set of models to be test
     %perform model calculations on the curent dataSet
-    output = MainMultiple(iterCount);
-    it = strcat('Iteration ',{' '}, int2str(iterCount), ' completed');
-    disp(it);
+    output = MainMultiple(iterCount, N);
     iterCount = iterCount + 1;
 end
 
 
 
-%perform data changes based on outputs and save over data file.
-[convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
-%gather displacement data from the solved models
-output = MainMultiple(1);
-iterCount = 2;
-
-
-% Do something with the output results after iterations are completed 
-or a convergence is met
+% %perform data changes based on outputs and save over data file.
+% [convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
+% %gather displacement data from the solved models
+% output = MainMultiple(1);
+% iterCount = 2;
+% 
+% 
+% % Do something with the output results after iterations are completed 
+% or a convergence is met
