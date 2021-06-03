@@ -5,7 +5,7 @@ numSol = size(modelData, 2);
 %% Calculate the ramp error for all sample data
 %use percentage difference of each solution to make it more comparable with
 %the hysteresis difference calculations.
-rampErrors = cell(1,numSol);
+rampErrors = zeros(1,numSol);
 for i = 1:numSol
     currRampData = modelData{1,i};
     percErrArr = zeros(1,size(currRampData, 2));
@@ -20,16 +20,16 @@ for i = 1:numSol
     %calculate avg percentage difference and return to model data file
     avgEr = mean(percErrArr);
     if isnan(avgEr)
-       rampErrors{1,i} = [];
+       rampErrors(1,i) = 1000000;
     else
-       rampErrors{1,i} = avgEr; 
+       rampErrors(1,i) = avgEr; 
     end
 end
 
 
 %% Calculate the sinusoidal error for all the sample data
-hystErrUp = cell(1,numSol);
-hystErrDown = cell(1,numSol);
+hystErrUp = zeros(1,numSol);
+hystErrDown = zeros(1,numSol);
 %calculate lower half error
 for i = 1:numSol
     %gather the data components for the lower half
@@ -41,15 +41,15 @@ for i = 1:numSol
         
         %determine the percentage difference in the solution.
         for j = 1:size(currDataX, 2)
-            percDiff = abs(currDataY(1,j) - hystValforX(1,j)) / hystValforX(1, j);
+            percDiff = abs(abs(currDataY(1,j) - hystValforX(1,j)) / hystValforX(1, j));
             percErrArr(1,j) = percDiff;
         end
         %calculate avg percentage difference and return to model data file
         avgEr = mean(percErrArr);
         if isnan(avgEr)
-            hystErrUp{1,i} = [];
+            hystErrUp(1,i) = 10000;
         else
-            hystErrUp{1,i} = avgEr;
+            hystErrUp(1,i) = avgEr;
         end
         
         %gather the data components for the upper half
@@ -60,19 +60,19 @@ for i = 1:numSol
         
         %determine the percentage difference in the solution.
         for j = 1:size(currDataX, 2)
-            percDiff = abs(currDataY(1,j) - hystValforX(1,j)) / hystValforX(1, j);
+            percDiff = abs(abs(currDataY(1,j) - hystValforX(1,j)) / hystValforX(1, j));
             percErrArr(1,j) = percDiff;
         end
         %calculate avg percentage difference and return to model data file
         avgEr = mean(percErrArr);
         if isnan(avgEr)
-            hystErrDown{1,i} = [];
+            hystErrDown(1,i) = 10000;
         else
-            hystErrDown{1,i} = avgEr;
+            hystErrDown(1,i) = avgEr;
         end
     else
-        hystErrDown{1,i} = [];
-        hystErrUp{1,i} = [];
+        hystErrDown(1,i) = 10000;
+        hystErrUp(1,i) = 10000;
     end
     
 end

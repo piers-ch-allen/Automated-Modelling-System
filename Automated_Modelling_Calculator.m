@@ -10,7 +10,7 @@ function [output, errorTracker] = Automated_Modelling_Calculator(numIterations, 
 %Gather the dataFile at its initialisation point
 addpath('Prony Code')
 load('dataStart.mat');
-bestCount = 1; genCount = 1; maxGens = 100; convergence = false;
+bestCount = 1; convergence = false;
 numInGen = 20; minErr = 0; inErr = 10000; iterCount = 1;
 initError = PronySolverScriptChange(AllData, N);
 [~, idx]=sort(initError{1,1}(:,(2*N) + 2));
@@ -71,24 +71,24 @@ viscoVariableWriteToFile(topVals, numInGen, N);
 %of convergence is reached.
 %Run the initial models based on first set of inputs.
 output = MainMultiple(iterCount, N);
-iterCount = iterCount + 1;
 errorTracker = zeros(numIterations, 3);
-numInGen = 100;
+solutionTracker = cell(numIterations,3);
+numInGen = 50;
 while (iterCount <= numIterations && convergence == false)
     %calculate the error on the models for eacg set of associated parameters
     outputData = cell(3,size(output,4));
     for i = 1:size(output, 4)
         try
             data = output{:,:,1,i};
-            x = data(:,1)'; disp = data(:,2)'; force = data(:,3)';
+            x = data(:,1)'; displace = data(:,2)'; force = data(:,3)';
             %find location of end of step 1 and its force to define ramp data
             idx = find(x==1.05,1,'first');
             a = 1255000;
-            rampData = [a*(x(1,3:idx)-0.05); 10000*disp(1,3:idx)];
+            rampData = [a*(x(1,3:idx)-0.05); 10000*displace(1,3:idx)];
 
             %find min and max of cyclic data to normalise values
             siz = size(data,1);
-            cycData = [a*(x(1,idx+1:siz)-0.05);10000*disp(1,idx+1:siz)];
+            cycData = [a*(x(1,idx+1:siz)-0.05);10000*displace(1,idx+1:siz)];
             sizC = size(cycData,2);
             %min displacement
             minD = min(cycData(2,:));
@@ -116,15 +116,20 @@ while (iterCount <= numIterations && convergence == false)
     load('errorCalcData.mat');
     err = modelErr(outputData, rampData, hystData);
     
-    %make a note of all the errors that are optimal with ecah iteration
-    [errorTracker(iterCount, 1), loc1] = min(cell2mat(err{1,1}));
-    [errorTracker(iterCount, 2), loc2] = min(cell2mat(err{1,2}));
-    [errorTracker(iterCount, 3), loc3] = min(cell2mat(err{1,3}));
+    %make a note of all the errors & solutions that are optimal with ecah iteration
+    [errorTracker(iterCount, 1), loc1] = min(err{1,1});
+    [errorTracker(iterCount, 2), loc2] = min(err{1,2});
+    [errorTracker(iterCount, 3), loc3] = min(err{1,3});
     
     %save optimal solutions
     currSoz = (2*N) + 1;
     newTopVals = zeros(1,(2*N) + 1);
     newTopVals(1:3,:) = [topVals(loc1,1:currSoz);topVals(loc2,1:currSoz);topVals(loc3,1:currSoz)];  
+    top3 = [topVals(loc1,:);topVals(loc2,:);topVals(loc3,:)];
+    
+    solutionTracker{iterCount,1} = top3(1,:);
+    solutionTracker{iterCount,2} = top3(2,:);
+    solutionTracker{iterCount,3} = top3(3,:);
     
     %create variations of the optimal solution to be then combined using
     %the genetic algorithm.
@@ -144,8 +149,7 @@ while (iterCount <= numIterations && convergence == false)
     temp = checkerVals(1:size(checkerVals,1),:);
     randSelec = temp(orders(1,1:27),:);
     
-    newTopVals = [newTopVals;randSelec(:,1:7)];
-    topVals = newTopVals;
+    topVals = [newTopVals;randSelec(:,1:7)];
     clearvars newTopVals;
     [its, dataSiz] = size(topVals);
     for i = 1:its
@@ -162,7 +166,7 @@ while (iterCount <= numIterations && convergence == false)
         topVals(j,(2*N) + 2) = ViscoErrFuncIncDist(topVals(j,1:(2*N) + 1), AllData);
     end
     [~, idx]=sort(topVals(:,(2*N) + 2));
-    topVals = [top;topVals(idx,:)];
+    topVals = [top;top3;topVals(idx,:)];
     
     %write the new iteration of variables to an excel file.
     viscoVariableWriteToFile(topVals(1:numInGen,1:(2*N) + 1), numInGen, N);
@@ -171,6 +175,11 @@ while (iterCount <= numIterations && convergence == false)
     %perform model calculations on the curent dataSet
     output = MainMultiple(iterCount, N);
     iterCount = iterCount + 1;
+    if mod(iterCount, 10) == 0
+        s = strcat('iteration ',int2str(iterCount), ' completed');
+        disp(s)
+        clearvars s;
+    end
 end
 
 
