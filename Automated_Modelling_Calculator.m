@@ -140,6 +140,9 @@ while (iterCount <= numIterations && convergence == false)
     [its, dataSiz] = size(checkerVals);
     for i = 1:its
         checkerVals(i,dataSiz+1) = ViscoErrFuncIncDist(checkerVals(i,1:dataSiz), AllData);
+        if i < 4
+           top3(i,8) = ViscoErrFuncIncDist(top3(i,1:dataSiz), AllData);
+        end
     end
     
     %take 27 random permutation of top solutions
@@ -155,12 +158,12 @@ while (iterCount <= numIterations && convergence == false)
     for i = 1:its
         topVals(i,dataSiz+1) = ViscoErrFuncIncDist(topVals(i,1:dataSiz), AllData);
     end
+    top = topVals(1,:);
     
     %perform genetic iteration on the 30 samples provided
     topVals = GeneticIterator(topVals, N, 50, 5000, minErr, AllData);
     
     %retrieve unique solutions
-    top = topVals(1,:);
     topVals = uniquetol(topVals(:,1:(2*N) + 1),0.05,'ByRows',true);
     for j = 1:size(topVals,1)
         topVals(j,(2*N) + 2) = ViscoErrFuncIncDist(topVals(j,1:(2*N) + 1), AllData);
