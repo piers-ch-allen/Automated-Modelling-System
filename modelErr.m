@@ -44,6 +44,8 @@ for i = 1:numSol
             percDiff = abs(abs(currDataY(1,j) - hystValforX(1,j)) / hystValforX(1, j));
             percErrArr(1,j) = percDiff;
         end
+        t = isoutlier(percErrArr, 'mean');
+        percErrArr(t) = []; 
         %calculate avg percentage difference and return to model data file
         avgEr = mean(percErrArr);
         if isnan(avgEr)
@@ -64,6 +66,8 @@ for i = 1:numSol
             percErrArr(1,j) = percDiff;
         end
         %calculate avg percentage difference and return to model data file
+        t = isoutlier(percErrArr, 'mean');
+        percErrArr(t) = []; 
         avgEr = mean(percErrArr);
         if isnan(avgEr)
             hystErrDown(1,i) = 10000;

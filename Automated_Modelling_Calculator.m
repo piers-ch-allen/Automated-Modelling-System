@@ -1,4 +1,4 @@
-function [output, errorTracker] = Automated_Modelling_Calculator(numIterations, N)
+function [output, errorTracker, solutionTracker] = Automated_Modelling_Calculator(numIterations, numInGen,N)
 %%Function to provide the parent class of the Automated modelling process
 % Itdoes inital data calculation and then provides a framework for
 % rerunning the process until a convergence is met.
@@ -11,7 +11,20 @@ function [output, errorTracker] = Automated_Modelling_Calculator(numIterations, 
 addpath('Prony Code')
 load('dataStart.mat');
 bestCount = 1; convergence = false;
-numInGen = 20; minErr = 0; inErr = 10000; iterCount = 1;
+minErr = 0; inErr = 10000; iterCount = 1;
+
+%Split the data set into a randomly allocated training and validation data
+%set
+m = unique(uint32(ceil(167*rand(40,1))));
+while size(m,1) < 40
+    a = ceil(167*rand(1,1));
+    m = unique([m;a]);
+end
+validationData = AllData(m,:);
+AllData(m,:) = [];
+clearvars a errOut m
+
+%Run the interior point optimisation
 initError = PronySolverScriptChange(AllData, N);
 [~, idx]=sort(initError{1,1}(:,(2*N) + 2));
 initError{1,1} = initError{1,1}(idx,:);
@@ -22,7 +35,7 @@ initGuessData = DataSetTool(initError{1,3}, 50, 1);
 %solve prony error for all initial values
 [its, dataSiz] = size(initGuessData);
 for i = 1:its
-    initGuessData(i,dataSiz+1) = ViscoErrFuncIncDist(initGuessData(i,1:dataSiz), AllData);
+    initGuessData(i,dataSiz+1) = ViscoErrFuncIncDist(initGuessData(i,1:dataSiz), validationData);
 end
 
 %remove incorrect solutions that have been included
@@ -50,20 +63,20 @@ end
 
 %perform an initial genetic run of small number of generations to imrove
 %starting results
-modelSolutions = GeneticIterator(modelSolutions, N, 50, 5000, minErr, AllData);
+modelSolutions = GeneticIterator(modelSolutions, N, 50, 5000, minErr, validationData);
 
-%retrieve unique solutions 
+%retrieve unique solutions and calculate their errors
 top = modelSolutions(1,:);
 modelSolutions = uniquetol(modelSolutions(:,1:(2*N) + 1),0.05,'ByRows',true);
 for j = 1:size(modelSolutions,1)
-    modelSolutions(j,(2*N) + 2) = ViscoErrFuncIncDist(modelSolutions(j,1:(2*N) + 1), AllData);
+    modelSolutions(j,(2*N) + 2) = ViscoErrFuncIncDist(modelSolutions(j,1:(2*N) + 1), validationData);
 end
 [~, idx]=sort(modelSolutions(:,(2*N) + 2));
 modelSolutions = [top;modelSolutions(idx,:)];
 
+%indentify and save inital material parameter data
 topVals = modelSolutions(1:20,1:(2*N) + 1);
-%save inital material parameter data
-viscoVariableWriteToFile(topVals, numInGen, N);
+viscoVariableWriteToFile(topVals, 20, N);
 
 %% Start loop for error cacluation and generation of new model possibilities
 %% Start iteration loop for model convergence
@@ -73,7 +86,6 @@ viscoVariableWriteToFile(topVals, numInGen, N);
 output = MainMultiple(iterCount, N);
 errorTracker = zeros(numIterations, 3);
 solutionTracker = cell(numIterations,3);
-numInGen = 50;
 while (iterCount <= numIterations && convergence == false)
     %calculate the error on the models for eacg set of associated parameters
     outputData = cell(3,size(output,4));
@@ -120,16 +132,16 @@ while (iterCount <= numIterations && convergence == false)
     [errorTracker(iterCount, 1), loc1] = min(err{1,1});
     [errorTracker(iterCount, 2), loc2] = min(err{1,2});
     [errorTracker(iterCount, 3), loc3] = min(err{1,3});
-    
+        
     %save optimal solutions
     currSoz = (2*N) + 1;
     newTopVals = zeros(1,(2*N) + 1);
     newTopVals(1:3,:) = [topVals(loc1,1:currSoz);topVals(loc2,1:currSoz);topVals(loc3,1:currSoz)];  
     top3 = [topVals(loc1,:);topVals(loc2,:);topVals(loc3,:)];
     
-    solutionTracker{iterCount,1} = top3(1,:);
-    solutionTracker{iterCount,2} = top3(2,:);
-    solutionTracker{iterCount,3} = top3(3,:);
+    solutionTracker{iterCount,1} = [top3(1,:),loc1];
+    solutionTracker{iterCount,2} = [top3(2,:),loc2];
+    solutionTracker{iterCount,3} = [top3(3,:),loc3];
     
     %create variations of the optimal solution to be then combined using
     %the genetic algorithm.
@@ -139,9 +151,9 @@ while (iterCount <= numIterations && convergence == false)
     checkerVals(51:75, :) = DataSetTool(newTopVals(3,:),24,1);    
     [its, dataSiz] = size(checkerVals);
     for i = 1:its
-        checkerVals(i,dataSiz+1) = ViscoErrFuncIncDist(checkerVals(i,1:dataSiz), AllData);
+        checkerVals(i,dataSiz+1) = ViscoErrFuncIncDist(checkerVals(i,1:dataSiz), validationData);
         if i < 4
-           top3(i,8) = ViscoErrFuncIncDist(top3(i,1:dataSiz), AllData);
+           top3(i,(2*N) +2) = ViscoErrFuncIncDist(top3(i,1:dataSiz), validationData);
         end
     end
     
@@ -150,23 +162,29 @@ while (iterCount <= numIterations && convergence == false)
     orders = linspace(1,size(checkerVals,1),size(checkerVals,1));
     orders = orders(randperm(length(orders)));
     temp = checkerVals(1:size(checkerVals,1),:);
-    randSelec = temp(orders(1,1:27),:);
     
-    topVals = [newTopVals;randSelec(:,1:7)];
+    %Check therre are 27 top solutions
+    if size(orders, 2) < 27
+        randSelec = temp(orders(1,1:size(orders,2)),:);
+    else
+        randSelec = temp(orders(1,1:27),:);
+    end
+    
+    topVals = [newTopVals;randSelec(:,1:(2*N) + 1)];
     clearvars newTopVals;
     [its, dataSiz] = size(topVals);
     for i = 1:its
-        topVals(i,dataSiz+1) = ViscoErrFuncIncDist(topVals(i,1:dataSiz), AllData);
+        topVals(i,dataSiz+1) = ViscoErrFuncIncDist(topVals(i,1:dataSiz), validationData);
     end
     top = topVals(1,:);
     
     %perform genetic iteration on the 30 samples provided
-    topVals = GeneticIterator(topVals, N, 50, 5000, minErr, AllData);
+    topVals = GeneticIterator(topVals, N, 50, 5000, minErr, validationData);
     
     %retrieve unique solutions
     topVals = uniquetol(topVals(:,1:(2*N) + 1),0.05,'ByRows',true);
     for j = 1:size(topVals,1)
-        topVals(j,(2*N) + 2) = ViscoErrFuncIncDist(topVals(j,1:(2*N) + 1), AllData);
+        topVals(j,(2*N) + 2) = ViscoErrFuncIncDist(topVals(j,1:(2*N) + 1), validationData);
     end
     [~, idx]=sort(topVals(:,(2*N) + 2));
     topVals = [top;top3;topVals(idx,:)];
@@ -184,15 +202,3 @@ while (iterCount <= numIterations && convergence == false)
         clearvars s;
     end
 end
-
-
-
-% %perform data changes based on outputs and save over data file.
-% [convergence,bestData,bestCount] = DataManipulatorVisco(initData, AllData, ones(1,8), bestCount, genCount, maxGens);
-% %gather displacement data from the solved models
-% output = MainMultiple(1);
-% iterCount = 2;
-% 
-% 
-% % Do something with the output results after iterations are completed 
-% or a convergence is met

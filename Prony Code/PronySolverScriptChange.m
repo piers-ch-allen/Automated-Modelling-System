@@ -2,7 +2,7 @@
 function ErrorSet = PronySolverScriptChange(dat, N)
 % script will run a user defined number of random interations to get the
 % optimal set of paramters
-NumIterations = 500;
+NumIterations = 20;
 %set number of prony parameters
 %create a result cell of result sets to work with of a defined number of
 %overall runs of the optimisation step
@@ -54,7 +54,7 @@ for i = 1 : NumIterations
             B(d+1,1) = 0;
         end
     end
-    options = optimoptions('fmincon', 'Algorithm', 'interior-point','Display', 'none',  'MaxFunEvals', 10000);
+    options = optimoptions('fmincon', 'Algorithm', 'interior-point','Display', 'none',  'MaxFunEvals', 500);
     lb = zeros(1,size(x0,2));
     lb(1,N+2:size(lb,2)) = ones(1,size(lb,2)-(N+1));
     [a, dist] = fmincon(fun, x0, A, B,[],[], lb, [], [], options);

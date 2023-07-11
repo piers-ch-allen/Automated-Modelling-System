@@ -160,15 +160,6 @@ for i = 1:size(MU_G_g_Nt,2)
     pDs{1,i} = makedist('Normal','mu',MU_G_g_Nt(1,i),'sigma',STD_G_g_Nt(1,i));
 end
 
-%Dunno what this is here for, may delete.
-% i = siz;
-% while i > N+1
-%     pDs{1,i} = pDs{1,(i - N + 1)}; 
-%     pDs{1,(i - N + 1)} = pDs{1,2};
-%     i = i - 1;
-% end
-
-
 randNum = rand(quartile*2,(2*N) + 2);   
 %perform the mutations
 for i = 1:quartile*2
